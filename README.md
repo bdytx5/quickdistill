@@ -97,7 +97,7 @@ quickdistill launch --debug            # Run in debug mode
 
 ## Project Structure
 
-When you run `quickdistill launch`, it creates these directories in your current working directory:
+When you run `quickdistill launch`, it creates these directories ~/.cache/quickdistill:
 
 ```
 your-project/
