@@ -1,0 +1,12 @@
+flask>=2.0.0
+flask-cors>=3.0.0
+openai>=1.0.0
+weave>=0.50.0
+llmasajudge>=0.1.0
+datasets>=2.0.0
+
+[dev]
+pytest>=7.0.0
+black>=22.0.0
+isort>=5.0.0
+flake8>=4.0.0

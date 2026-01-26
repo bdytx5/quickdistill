@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Judge Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            color: #4a9eff;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        label {
+            display: block;
+            color: #aaa;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+
+        textarea {
+            min-height: 150px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #2a7c4a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #3a8c5a;
+        }
+
+        .judge-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .judge-card {
+            background: #0f0f0f;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .judge-info {
+            flex: 1;
+        }
+
+        .judge-name {
+            color: #4a9eff;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .judge-desc {
+            color: #888;
+            font-size: 13px;
+        }
+
+        .judge-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-delete {
+            background: #7c2a2a;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-edit {
+            background: #4a6a9e;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .criteria-list {
+            margin-bottom: 15px;
+        }
+
+        .criterion {
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .criterion input {
+            margin-bottom: 0;
+        }
+
+        .criterion button {
+            background: #7c2a2a;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .add-criterion-btn {
+            background: #4a6a9e;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Judge Manager</h1>
+
+        <!-- Create/Edit Judge Section -->
+        <div class="section">
+            <h2 id="form-title">Create New Judge</h2>
+
+            <label for="judge-name">Judge Name</label>
+            <input type="text" id="judge-name" placeholder="e.g., similarity_judge">
+
+            <label for="judge-type">Judge Type</label>
+            <select id="judge-type">
+                <option value="llm">LLM-as-a-Judge</option>
+                <option value="custom">Custom Function</option>
+            </select>
+
+            <div id="llm-options" style="display: block;">
+                <label for="judge-model">Model</label>
+                <select id="judge-model">
+                    <option value="gpt-5">gpt-5</option>
+                    <option value="gpt-4o">gpt-4o</option>
+                    <option value="gpt-4o-mini">gpt-4o-mini</option>
+                    <option value="claude-3-5-sonnet-20241022">claude-3-5-sonnet</option>
+                </select>
+
+                <label for="judge-return-type">Return Type</label>
+                <select id="judge-return-type">
+                    <option value="scalar">Scalar (single numeric score)</option>
+                    <option value="boolean">Boolean (true/false, CORRECT/INCORRECT)</option>
+                    <!-- <option value="map">Map (dict with multiple scores)</option> -->
+                    <!-- <option value="string">String (text classification)</option> -->
+                </select>
+                <p style="color: #888; font-size: 12px; margin-top: 5px;">
+                    <strong>Scalar:</strong> Instruct model to return JSON with <code>'score'</code> or <code>'scores'</code> key<br>
+                    <strong>Boolean:</strong> Instruct model to return JSON with <code>'correct'</code> key
+                </p>
+
+                <label for="judge-prompt">Judge Prompt Template</label>
+                <p style="color: #888; font-size: 12px; margin-bottom: 10px;">
+                    Required placeholders: <code>{strong_output}</code>, <code>{weak_output}</code><br>
+                    Optional placeholder: <code>{question}</code>
+                </p>
+                <textarea id="judge-prompt"></textarea>
+            </div>
+
+            <div id="custom-options" style="display: none;">
+                <label for="custom-function">Custom Function (Python)</label>
+                <textarea id="custom-function" placeholder="def custom_judge(strong_output: str, weak_output: str) -> dict:
+    # Your custom logic here
+    return {'similarity': 1.0 if strong_output == weak_output else 0.0}"></textarea>
+            </div>
+
+            <button onclick="saveJudge()" id="save-btn">Save Judge</button>
+            <button onclick="cancelEdit()" id="cancel-btn" style="display: none; background: #5a2a2a; margin-left: 10px;">Cancel</button>
+        </div>
+
+
+        <!-- Saved Judges Section -->
+        <div class="section">
+            <h2>Saved Judges</h2>
+            <div class="judge-list" id="judge-list">
+                <div style="color: #666;">No judges saved yet</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let judges = [];
+        let editingIndex = null;
+
+        // Default prompts for different return types
+        const DEFAULT_PROMPTS = {
+            scalar: `You are a strict evaluator comparing two AI responses (one from a strong reference model which is the ground truth, and one from a weaker model which we are testing to see how similar the responses it generates are to the strong model).
+
+Strong Model Response: {strong_output}
+Weak Model Response: {weak_output}
+
+Evaluate how similar the weak model response is to the strong model response.
+Rate on a scale of 1-5 where 1=completely different and 5=nearly identical. RETURN ONLY ONE SCORE REPRESENTY THE AVERAGE SIMILARITY
+
+Respond in JSON format eg {'scores': the_score }`,
+            boolean: `You are a strict evaluator comparing two AI responses (one from a strong reference model which is the ground truth, and one from a weaker model which we are testing to see how similar the responses it generates are to the strong model).
+
+Strong Model Response: {strong_output}
+Weak Model Response: {weak_output}
+
+Determine if the weak model response is CORRECT compared to the strong model response.
+Consider a response CORRECT if it conveys the same key information and meaning, even if worded differently.
+
+Respond in JSON format: {'correct': true} or {'correct': false}`
+        };
+
+        // Load judges from server
+        async function loadJudges() {
+            try {
+                const response = await fetch('/list_judges');
+                const data = await response.json();
+                judges = data.judges || [];
+            } catch (e) {
+                console.error('Error loading judges:', e);
+                judges = [];
+            }
+            renderJudges();
+        }
+
+        // Save judge to server
+        async function saveJudgeToServer(judge) {
+            try {
+                const response = await fetch('/save_judge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ judge })
+                });
+                const data = await response.json();
+                judges = data.judges || [];
+                return true;
+            } catch (e) {
+                console.error('Error saving judge:', e);
+                alert('Error saving judge: ' + e.message);
+                return false;
+            }
+        }
+
+        // Add criterion field
+        function addCriterion() {
+            const list = document.getElementById('criteria-list');
+            const div = document.createElement('div');
+            div.className = 'criterion';
+            div.innerHTML = `
+                <input type="text" placeholder="Criterion name (e.g., accuracy, coherence)" style="flex: 1;">
+                <input type="text" placeholder="Description" style="flex: 2;">
+                <button onclick="this.parentElement.remove()">Remove</button>
+            `;
+            list.appendChild(div);
+        }
+
+        // Get criteria from form
+        function getCriteria() {
+            const criteriaElements = document.querySelectorAll('.criterion');
+            const criteria = [];
+            criteriaElements.forEach(el => {
+                const inputs = el.querySelectorAll('input');
+                if (inputs[0].value.trim()) {
+                    criteria.push({
+                        name: inputs[0].value.trim(),
+                        description: inputs[1].value.trim()
+                    });
+                }
+            });
+            return criteria;
+        }
+
+        // Save judge
+        async function saveJudge() {
+            const name = document.getElementById('judge-name').value.trim();
+            const type = document.getElementById('judge-type').value;
+
+            if (!name) {
+                alert('Please enter a judge name');
+                return;
+            }
+
+            const judge = {
+                name,
+                type
+            };
+
+            if (type === 'llm') {
+                judge.model = document.getElementById('judge-model').value;
+                judge.returnType = document.getElementById('judge-return-type').value;
+                judge.prompt = document.getElementById('judge-prompt').value.trim();
+
+                // Validate required placeholders
+                if (!judge.prompt.includes('{strong_output}')) {
+                    alert('Error: Judge prompt must include {strong_output} placeholder');
+                    return;
+                }
+                if (!judge.prompt.includes('{weak_output}')) {
+                    alert('Error: Judge prompt must include {weak_output} placeholder');
+                    return;
+                }
+            } else {
+                judge.customFunction = document.getElementById('custom-function').value.trim();
+            }
+
+            const success = await saveJudgeToServer(judge);
+            if (success) {
+                resetForm();
+                renderJudges();
+                alert('Judge saved successfully!');
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('judge-name').value = '';
+            document.getElementById('judge-type').value = 'llm';
+            document.getElementById('judge-model').value = 'gpt-5-2025-08-07';
+            document.getElementById('judge-prompt').value = '';
+            document.getElementById('custom-function').value = '';
+            document.getElementById('form-title').textContent = 'Create New Judge';
+            document.getElementById('save-btn').textContent = 'Save Judge';
+            document.getElementById('cancel-btn').style.display = 'none';
+            editingIndex = null;
+        }
+
+        // Cancel edit
+        function cancelEdit() {
+            resetForm();
+        }
+
+        // Edit judge
+        function editJudge(index) {
+            const judge = judges[index];
+            editingIndex = index;
+
+            document.getElementById('judge-name').value = judge.name;
+            document.getElementById('judge-type').value = judge.type;
+            toggleJudgeType();
+
+            if (judge.type === 'llm') {
+                document.getElementById('judge-model').value = judge.model;
+                document.getElementById('judge-return-type').value = judge.returnType || 'scalar';
+                document.getElementById('judge-prompt').value = judge.prompt || '';
+            } else {
+                document.getElementById('custom-function').value = judge.customFunction || '';
+            }
+
+            document.getElementById('form-title').textContent = 'Edit Judge';
+            document.getElementById('save-btn').textContent = 'Update Judge';
+            document.getElementById('cancel-btn').style.display = 'inline-block';
+            window.scrollTo(0, 0);
+        }
+
+        // Delete judge
+        async function deleteJudge(index) {
+            if (confirm('Are you sure you want to delete this judge?')) {
+                const judgeName = judges[index].name;
+                try {
+                    const response = await fetch('/delete_judge', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: judgeName })
+                    });
+                    const data = await response.json();
+                    judges = data.judges || [];
+                    renderJudges();
+                } catch (e) {
+                    console.error('Error deleting judge:', e);
+                    alert('Error deleting judge: ' + e.message);
+                }
+            }
+        }
+
+        // Render judges list
+        function renderJudges() {
+            const list = document.getElementById('judge-list');
+            if (judges.length === 0) {
+                list.innerHTML = '<div style="color: #666;">No judges saved yet</div>';
+                return;
+            }
+
+            list.innerHTML = judges.map((judge, index) => `
+                <div class="judge-card">
+                    <div class="judge-info">
+                        <div class="judge-name">${judge.name}</div>
+                        <div class="judge-desc">Type: ${judge.type.toUpperCase()}${judge.model ? ' • Model: ' + judge.model : ''}${judge.returnType ? ' • Return: ' + judge.returnType : ''}</div>
+                    </div>
+                    <div class="judge-actions">
+                        <button class="btn-edit" onclick="editJudge(${index})">Edit</button>
+                        <button class="btn-delete" onclick="deleteJudge(${index})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Toggle judge type options
+        function toggleJudgeType() {
+            const type = document.getElementById('judge-type').value;
+            document.getElementById('llm-options').style.display = type === 'llm' ? 'block' : 'none';
+            document.getElementById('custom-options').style.display = type === 'custom' ? 'block' : 'none';
+        }
+
+        document.getElementById('judge-type').addEventListener('change', toggleJudgeType);
+
+        // Export judges to JSON file
+        function exportJudges() {
+            if (judges.length === 0) {
+                alert('No judges to export!');
+                return;
+            }
+
+            const blob = new Blob([JSON.stringify(judges, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'judges.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert(`Exported ${judges.length} judge(s) to judges.json`);
+        }
+
+        // Initialize
+        loadJudges();
+
+        // Set initial prompt to scalar default
+        document.getElementById('judge-prompt').value = DEFAULT_PROMPTS.scalar;
+
+        // Track if user has manually edited the prompt
+        let userEditedPrompt = false;
+        let lastDefaultPrompt = DEFAULT_PROMPTS.scalar;
+
+        document.getElementById('judge-prompt').addEventListener('input', () => {
+            const currentPrompt = document.getElementById('judge-prompt').value.trim();
+            const isDefaultPrompt = Object.values(DEFAULT_PROMPTS).some(p => p === currentPrompt);
+            // Only mark as edited if it's not a default prompt
+            if (!isDefaultPrompt) {
+                userEditedPrompt = true;
+            } else {
+                userEditedPrompt = false;
+            }
+        });
+
+        // Handle return type change
+        document.getElementById('judge-return-type').addEventListener('change', (e) => {
+            const returnType = e.target.value;
+            const promptTextarea = document.getElementById('judge-prompt');
+
+            console.log('Return type changed to:', returnType);
+            console.log('User edited prompt:', userEditedPrompt);
+
+            // Only update if user hasn't manually edited the prompt
+            if (!userEditedPrompt) {
+                const newPrompt = DEFAULT_PROMPTS[returnType] || DEFAULT_PROMPTS.scalar;
+                console.log('Setting new prompt for:', returnType);
+                promptTextarea.value = newPrompt;
+                lastDefaultPrompt = newPrompt;
+            } else {
+                console.log('Not changing prompt - user has edited it');
+            }
+        });
+    </script>
+</body>
+</html>
