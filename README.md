@@ -1,6 +1,6 @@
 # QuickDistill
 
-**Fast and easy toolkit for distilling AI models**
+**Fast and easy toolkit for evaluating AI models (and training them in the future)**
 
 QuickDistill provides an intuitive web UI for the complete model distillation workflow:
 - 📊 View and filter Weave traces from your LLM calls
