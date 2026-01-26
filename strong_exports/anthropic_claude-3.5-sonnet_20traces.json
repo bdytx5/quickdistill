@@ -1,0 +1,944 @@
+[
+  {
+    "id": "019bf8f3-7b24-78cf-a115-019c13344fa9",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/openai.chat.completions.create:8hrERAtlIuTQVDQbHY8fFE6fLeoDMfYyyO8dCerUYXc",
+    "op_display_name": "openai.chat.completions.create",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:44.996441+00:00",
+    "inputs": {
+      "self": {
+        "client": {
+          "base_url": "https://openrouter.ai/api/v1/",
+          "version": "2.14.0"
+        }
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Based on the following context, answer the question concisely.\n\nContext: Data Center The NVIDIA computing platform is focused on accelerating the most compute-intensive workloads, such as AI, data analytics, graphics and scientific computing, across hyperscale, cloud, enterprise, public sector, and edge data centers. The platform consists of our energy efficient GPUs, data processing units, or DPUs, interconnects and systems, our CUDA programming model, and a growing body of software libraries, software development kits, or SDKs, application frameworks and services, which are either available as part of the platform or packaged and sold separately.\n\nQuestion: What are the key components of the NVIDIA computing platform?\n\nAnswer:"
+        }
+      ],
+      "model": "anthropic/claude-3.5-sonnet",
+      "max_tokens": 150,
+      "temperature": 0,
+      "timeout": "NOT_GIVEN"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Based on the following context, answer the question concisely.\n\nContext: Data Center The NVIDIA computing platform is focused on accelerating the most compute-intensive workloads, such as AI, data analytics, graphics and scientific computing, across hyperscale, cloud, enterprise, public sector, and edge data centers. The platform consists of our energy efficient GPUs, data processing units, or DPUs, interconnects and systems, our CUDA programming model, and a growing body of software libraries, software development kits, or SDKs, application frameworks and services, which are either available as part of the platform or packaged and sold separately.\n\nQuestion: What are the key components of the NVIDIA computing platform?\n\nAnswer:"
+      }
+    ],
+    "output": "The key components of the NVIDIA computing platform are:\n1. Energy efficient GPUs\n2. DPUs (Data Processing Units)\n3. Interconnects and systems\n4. CUDA programming model\n5. Software libraries\n6. Software Development Kits (SDKs)\n7. Application frameworks\n8. Services",
+    "temperature": 0,
+    "max_tokens": 150,
+    "usage": {
+      "prompt_tokens": 160,
+      "completion_tokens": 74,
+      "requests": 1,
+      "total_tokens": 234,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost": 0.00318,
+      "is_byok": false,
+      "cost_details": {
+        "upstream_inference_cost": null,
+        "upstream_inference_prompt_cost": 0.00096,
+        "upstream_inference_completions_cost": 0.00222
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-7b23-760e-a59c-e76101384506",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/run_openrouter_inference:80Sb8kSXN4xh2MzakqCmUY6Dj8xpcb6BzblEFSgSzpU",
+    "op_display_name": "run_openrouter_inference",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:44.995886+00:00",
+    "inputs": {
+      "client": "<openai.OpenAI object at 0x17dc4f5b0>",
+      "model": "anthropic/claude-3.5-sonnet",
+      "question": "What are the key components of the NVIDIA computing platform?",
+      "context": "Data Center The NVIDIA computing platform is focused on accelerating the most compute-intensive workloads, such as AI, data analytics, graphics and scientific computing, across hyperscale, cloud, enterprise, public sector, and edge data centers. The platform consists of our energy efficient GPUs, data processing units, or DPUs, interconnects and systems, our CUDA programming model, and a growing body of software libraries, software development kits, or SDKs, application frameworks and services, which are either available as part of the platform or packaged and sold separately."
+    },
+    "messages": [],
+    "output": "The key components of the NVIDIA computing platform are:\n1. Energy efficient GPUs\n2. DPUs (Data Processing Units)\n3. Interconnects and systems\n4. CUDA programming model\n5. Software libraries\n6. Software Development Kits (SDKs)\n7. Application frameworks\n8. Services",
+    "temperature": null,
+    "max_tokens": null,
+    "usage": {
+      "prompt_tokens": 160,
+      "completion_tokens": 74,
+      "requests": 1,
+      "total_tokens": 234,
+      "cost": 0.00318,
+      "is_byok": 0,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_prompt_cost": 0.00096,
+        "upstream_inference_completions_cost": 0.00222
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-7210-73e0-9cbb-9fe9fb63c659",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/openai.chat.completions.create:8hrERAtlIuTQVDQbHY8fFE6fLeoDMfYyyO8dCerUYXc",
+    "op_display_name": "openai.chat.completions.create",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:42.672610+00:00",
+    "inputs": {
+      "self": {
+        "client": {
+          "base_url": "https://openrouter.ai/api/v1/",
+          "version": "2.14.0"
+        }
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Based on the following context, answer the question concisely.\n\nContext: Data Center The NVIDIA computing platform is focused on accelerating the most compute-intensive workloads, such as AI, data analytics, graphics and scientific computing, across hyperscale, cloud, enterprise, public sector, and edge data centers. The platform consists of our energy efficient GPUs, data processing units, or DPUs, interconnects and systems, our CUDA programming model, and a growing body of software libraries, software development kits, or SDKs, application frameworks and services, which are either available as part of the platform or packaged and sold separately.\n\nQuestion: What does the NVIDIA computing platform focus on accelerating?\n\nAnswer:"
+        }
+      ],
+      "model": "anthropic/claude-3.5-sonnet",
+      "max_tokens": 150,
+      "temperature": 0,
+      "timeout": "NOT_GIVEN"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Based on the following context, answer the question concisely.\n\nContext: Data Center The NVIDIA computing platform is focused on accelerating the most compute-intensive workloads, such as AI, data analytics, graphics and scientific computing, across hyperscale, cloud, enterprise, public sector, and edge data centers. The platform consists of our energy efficient GPUs, data processing units, or DPUs, interconnects and systems, our CUDA programming model, and a growing body of software libraries, software development kits, or SDKs, application frameworks and services, which are either available as part of the platform or packaged and sold separately.\n\nQuestion: What does the NVIDIA computing platform focus on accelerating?\n\nAnswer:"
+      }
+    ],
+    "output": "The NVIDIA computing platform focuses on accelerating compute-intensive workloads including:\n- AI\n- Data analytics\n- Graphics\n- Scientific computing\n\nThese workloads are accelerated across various data center environments (hyperscale, cloud, enterprise, public sector, and edge).",
+    "temperature": 0,
+    "max_tokens": 150,
+    "usage": {
+      "prompt_tokens": 160,
+      "completion_tokens": 62,
+      "requests": 1,
+      "total_tokens": 222,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost": 0.00282,
+      "is_byok": false,
+      "cost_details": {
+        "upstream_inference_cost": null,
+        "upstream_inference_prompt_cost": 0.00096,
+        "upstream_inference_completions_cost": 0.00186
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-720f-7c82-98fc-94252312ca46",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/run_openrouter_inference:80Sb8kSXN4xh2MzakqCmUY6Dj8xpcb6BzblEFSgSzpU",
+    "op_display_name": "run_openrouter_inference",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:42.671989+00:00",
+    "inputs": {
+      "client": "<openai.OpenAI object at 0x17dc4f5b0>",
+      "model": "anthropic/claude-3.5-sonnet",
+      "question": "What does the NVIDIA computing platform focus on accelerating?",
+      "context": "Data Center The NVIDIA computing platform is focused on accelerating the most compute-intensive workloads, such as AI, data analytics, graphics and scientific computing, across hyperscale, cloud, enterprise, public sector, and edge data centers. The platform consists of our energy efficient GPUs, data processing units, or DPUs, interconnects and systems, our CUDA programming model, and a growing body of software libraries, software development kits, or SDKs, application frameworks and services, which are either available as part of the platform or packaged and sold separately."
+    },
+    "messages": [],
+    "output": "The NVIDIA computing platform focuses on accelerating compute-intensive workloads including:\n- AI\n- Data analytics\n- Graphics\n- Scientific computing\n\nThese workloads are accelerated across various data center environments (hyperscale, cloud, enterprise, public sector, and edge).",
+    "temperature": null,
+    "max_tokens": null,
+    "usage": {
+      "prompt_tokens": 160,
+      "completion_tokens": 62,
+      "requests": 1,
+      "total_tokens": 222,
+      "cost": 0.00282,
+      "is_byok": 0,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_prompt_cost": 0.00096,
+        "upstream_inference_completions_cost": 0.00186
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-6c26-7b57-b3ad-79f2e45875de",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/openai.chat.completions.create:8hrERAtlIuTQVDQbHY8fFE6fLeoDMfYyyO8dCerUYXc",
+    "op_display_name": "openai.chat.completions.create",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:41.158519+00:00",
+    "inputs": {
+      "self": {
+        "client": {
+          "base_url": "https://openrouter.ai/api/v1/",
+          "version": "2.14.0"
+        }
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Based on the following context, answer the question concisely.\n\nContext: We recorded an acquisition termination cost of $1.35 billion in fiscal year 2023 reflecting the write-off of the prepayment provided at signing.\n\nQuestion: What amount did NVIDIA record as an acquisition termination cost in fiscal year 2023?\n\nAnswer:"
+        }
+      ],
+      "model": "anthropic/claude-3.5-sonnet",
+      "max_tokens": 150,
+      "temperature": 0,
+      "timeout": "NOT_GIVEN"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Based on the following context, answer the question concisely.\n\nContext: We recorded an acquisition termination cost of $1.35 billion in fiscal year 2023 reflecting the write-off of the prepayment provided at signing.\n\nQuestion: What amount did NVIDIA record as an acquisition termination cost in fiscal year 2023?\n\nAnswer:"
+      }
+    ],
+    "output": "NVIDIA recorded an acquisition termination cost of $1.35 billion in fiscal year 2023.",
+    "temperature": 0,
+    "max_tokens": 150,
+    "usage": {
+      "prompt_tokens": 83,
+      "completion_tokens": 25,
+      "requests": 1,
+      "total_tokens": 108,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost": 0.001248,
+      "is_byok": false,
+      "cost_details": {
+        "upstream_inference_cost": null,
+        "upstream_inference_prompt_cost": 0.000498,
+        "upstream_inference_completions_cost": 0.00075
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-6c25-7e80-ab82-6ceea78517aa",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/run_openrouter_inference:80Sb8kSXN4xh2MzakqCmUY6Dj8xpcb6BzblEFSgSzpU",
+    "op_display_name": "run_openrouter_inference",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:41.157956+00:00",
+    "inputs": {
+      "client": "<openai.OpenAI object at 0x17dc4f5b0>",
+      "model": "anthropic/claude-3.5-sonnet",
+      "question": "What amount did NVIDIA record as an acquisition termination cost in fiscal year 2023?",
+      "context": "We recorded an acquisition termination cost of $1.35 billion in fiscal year 2023 reflecting the write-off of the prepayment provided at signing."
+    },
+    "messages": [],
+    "output": "NVIDIA recorded an acquisition termination cost of $1.35 billion in fiscal year 2023.",
+    "temperature": null,
+    "max_tokens": null,
+    "usage": {
+      "prompt_tokens": 83,
+      "completion_tokens": 25,
+      "requests": 1,
+      "total_tokens": 108,
+      "cost": 0.001248,
+      "is_byok": 0,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_prompt_cost": 0.000498,
+        "upstream_inference_completions_cost": 0.00075
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-659a-7a5a-a4a1-6e535c0f82c4",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/openai.chat.completions.create:8hrERAtlIuTQVDQbHY8fFE6fLeoDMfYyyO8dCerUYXc",
+    "op_display_name": "openai.chat.completions.create",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:39.482292+00:00",
+    "inputs": {
+      "self": {
+        "client": {
+          "base_url": "https://openrouter.ai/api/v1/",
+          "version": "2.14.0"
+        }
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Based on the following context, answer the question concisely.\n\nContext: Termination of the Arm Share Purchase Agreement In February 2022, NVIDIA and SoftBank Group Corp., or SoftBank, announced the termination of the Share Purchase Agreement whereby NVIDIA would have acquired Arm Limited, or Arm, from SoftBank. The parties agreed to terminate because of significant regulatory challenges preventing the completion of the transaction.\n\nQuestion: Why did NVIDIA and SoftBank terminate their Share Purchase Agreement for acquiring Arm Limited?\n\nAnswer:"
+        }
+      ],
+      "model": "anthropic/claude-3.5-sonnet",
+      "max_tokens": 150,
+      "temperature": 0,
+      "timeout": "NOT_GIVEN"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Based on the following context, answer the question concisely.\n\nContext: Termination of the Arm Share Purchase Agreement In February 2022, NVIDIA and SoftBank Group Corp., or SoftBank, announced the termination of the Share Purchase Agreement whereby NVIDIA would have acquired Arm Limited, or Arm, from SoftBank. The parties agreed to terminate because of significant regulatory challenges preventing the completion of the transaction.\n\nQuestion: Why did NVIDIA and SoftBank terminate their Share Purchase Agreement for acquiring Arm Limited?\n\nAnswer:"
+      }
+    ],
+    "output": "The agreement was terminated due to significant regulatory challenges that prevented the completion of the transaction.",
+    "temperature": 0,
+    "max_tokens": 150,
+    "usage": {
+      "prompt_tokens": 123,
+      "completion_tokens": 20,
+      "requests": 1,
+      "total_tokens": 143,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost": 0.001338,
+      "is_byok": false,
+      "cost_details": {
+        "upstream_inference_cost": null,
+        "upstream_inference_prompt_cost": 0.000738,
+        "upstream_inference_completions_cost": 0.0006
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-6599-78d7-94cf-bd7dabacddb7",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/run_openrouter_inference:80Sb8kSXN4xh2MzakqCmUY6Dj8xpcb6BzblEFSgSzpU",
+    "op_display_name": "run_openrouter_inference",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:39.481351+00:00",
+    "inputs": {
+      "client": "<openai.OpenAI object at 0x17dc4f5b0>",
+      "model": "anthropic/claude-3.5-sonnet",
+      "question": "Why did NVIDIA and SoftBank terminate their Share Purchase Agreement for acquiring Arm Limited?",
+      "context": "Termination of the Arm Share Purchase Agreement In February 2022, NVIDIA and SoftBank Group Corp., or SoftBank, announced the termination of the Share Purchase Agreement whereby NVIDIA would have acquired Arm Limited, or Arm, from SoftBank. The parties agreed to terminate because of significant regulatory challenges preventing the completion of the transaction."
+    },
+    "messages": [],
+    "output": "The agreement was terminated due to significant regulatory challenges that prevented the completion of the transaction.",
+    "temperature": null,
+    "max_tokens": null,
+    "usage": {
+      "prompt_tokens": 123,
+      "completion_tokens": 20,
+      "requests": 1,
+      "total_tokens": 143,
+      "cost": 0.001338,
+      "is_byok": 0,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_prompt_cost": 0.000738,
+        "upstream_inference_completions_cost": 0.0006
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-5ac9-7b2d-8c3e-4e740ba30e8c",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/openai.chat.completions.create:8hrERAtlIuTQVDQbHY8fFE6fLeoDMfYyyO8dCerUYXc",
+    "op_display_name": "openai.chat.completions.create",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:36.713739+00:00",
+    "inputs": {
+      "self": {
+        "client": {
+          "base_url": "https://openrouter.ai/api/v1/",
+          "version": "2.14.0"
+        }
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Based on the following context, answer the question concisely.\n\nContext: A rapidly growing number of enterprises and startups across a broad range of industries use our GPUs and software to bring automation to the products and services they build. The transportation industry is turning to our platforms for autonomous driving; the healthcare industry is leveraging them for enhanced medical imaging and acceleration of drug discovery; and the financial services industry is using them for fraud detection. Professional designers use our GPUs and software to create visual effects in movies and to design buildings and products ranging from cell phones to commercial aircraft.\n\nQuestion: What industries use NVIDIA's GPUs and software for automation?\n\nAnswer:"
+        }
+      ],
+      "model": "anthropic/claude-3.5-sonnet",
+      "max_tokens": 150,
+      "temperature": 0,
+      "timeout": "NOT_GIVEN"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Based on the following context, answer the question concisely.\n\nContext: A rapidly growing number of enterprises and startups across a broad range of industries use our GPUs and software to bring automation to the products and services they build. The transportation industry is turning to our platforms for autonomous driving; the healthcare industry is leveraging them for enhanced medical imaging and acceleration of drug discovery; and the financial services industry is using them for fraud detection. Professional designers use our GPUs and software to create visual effects in movies and to design buildings and products ranging from cell phones to commercial aircraft.\n\nQuestion: What industries use NVIDIA's GPUs and software for automation?\n\nAnswer:"
+      }
+    ],
+    "output": "According to the context, these industries use NVIDIA's GPUs and software:\n1. Transportation (for autonomous driving)\n2. Healthcare (for medical imaging and drug discovery)\n3. Financial services (for fraud detection)\n4. Professional design/entertainment (for visual effects and product design)",
+    "temperature": 0,
+    "max_tokens": 150,
+    "usage": {
+      "prompt_tokens": 143,
+      "completion_tokens": 65,
+      "requests": 1,
+      "total_tokens": 208,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost": 0.002808,
+      "is_byok": false,
+      "cost_details": {
+        "upstream_inference_cost": null,
+        "upstream_inference_prompt_cost": 0.000858,
+        "upstream_inference_completions_cost": 0.00195
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-5ac9-794e-9c34-3efd30e0f62a",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/run_openrouter_inference:80Sb8kSXN4xh2MzakqCmUY6Dj8xpcb6BzblEFSgSzpU",
+    "op_display_name": "run_openrouter_inference",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:36.713215+00:00",
+    "inputs": {
+      "client": "<openai.OpenAI object at 0x17dc4f5b0>",
+      "model": "anthropic/claude-3.5-sonnet",
+      "question": "What industries use NVIDIA's GPUs and software for automation?",
+      "context": "A rapidly growing number of enterprises and startups across a broad range of industries use our GPUs and software to bring automation to the products and services they build. The transportation industry is turning to our platforms for autonomous driving; the healthcare industry is leveraging them for enhanced medical imaging and acceleration of drug discovery; and the financial services industry is using them for fraud detection. Professional designers use our GPUs and software to create visual effects in movies and to design buildings and products ranging from cell phones to commercial aircraft."
+    },
+    "messages": [],
+    "output": "According to the context, these industries use NVIDIA's GPUs and software:\n1. Transportation (for autonomous driving)\n2. Healthcare (for medical imaging and drug discovery)\n3. Financial services (for fraud detection)\n4. Professional design/entertainment (for visual effects and product design)",
+    "temperature": null,
+    "max_tokens": null,
+    "usage": {
+      "prompt_tokens": 143,
+      "completion_tokens": 65,
+      "requests": 1,
+      "total_tokens": 208,
+      "cost": 0.002808,
+      "is_byok": 0,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_prompt_cost": 0.000858,
+        "upstream_inference_completions_cost": 0.00195
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-5576-7b17-a0e9-efcb58e9075a",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/openai.chat.completions.create:8hrERAtlIuTQVDQbHY8fFE6fLeoDMfYyyO8dCerUYXc",
+    "op_display_name": "openai.chat.completions.create",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:35.350083+00:00",
+    "inputs": {
+      "self": {
+        "client": {
+          "base_url": "https://openrouter.ai/api/v1/",
+          "version": "2.14.0"
+        }
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Based on the following context, answer the question concisely.\n\nContext: With our introduction of the CUDA programming model in 2006, we opened the parallel processing capabilities of our GPU for general purpose computing.\n\nQuestion: What does NVIDIA's CUDA programming model enable?\n\nAnswer:"
+        }
+      ],
+      "model": "anthropic/claude-3.5-sonnet",
+      "max_tokens": 150,
+      "temperature": 0,
+      "timeout": "NOT_GIVEN"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Based on the following context, answer the question concisely.\n\nContext: With our introduction of the CUDA programming model in 2006, we opened the parallel processing capabilities of our GPU for general purpose computing.\n\nQuestion: What does NVIDIA's CUDA programming model enable?\n\nAnswer:"
+      }
+    ],
+    "output": "CUDA enables developers to use NVIDIA's GPU for general purpose computing by accessing its parallel processing capabilities.",
+    "temperature": 0,
+    "max_tokens": 150,
+    "usage": {
+      "prompt_tokens": 68,
+      "completion_tokens": 24,
+      "requests": 1,
+      "total_tokens": 92,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost": 0.001128,
+      "is_byok": false,
+      "cost_details": {
+        "upstream_inference_cost": null,
+        "upstream_inference_prompt_cost": 0.000408,
+        "upstream_inference_completions_cost": 0.00072
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-5575-76ca-a676-44197ff86920",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/run_openrouter_inference:80Sb8kSXN4xh2MzakqCmUY6Dj8xpcb6BzblEFSgSzpU",
+    "op_display_name": "run_openrouter_inference",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:35.349474+00:00",
+    "inputs": {
+      "client": "<openai.OpenAI object at 0x17dc4f5b0>",
+      "model": "anthropic/claude-3.5-sonnet",
+      "question": "What does NVIDIA's CUDA programming model enable?",
+      "context": "With our introduction of the CUDA programming model in 2006, we opened the parallel processing capabilities of our GPU for general purpose computing."
+    },
+    "messages": [],
+    "output": "CUDA enables developers to use NVIDIA's GPU for general purpose computing by accessing its parallel processing capabilities.",
+    "temperature": null,
+    "max_tokens": null,
+    "usage": {
+      "prompt_tokens": 68,
+      "completion_tokens": 24,
+      "requests": 1,
+      "total_tokens": 92,
+      "cost": 0.001128,
+      "is_byok": 0,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_prompt_cost": 0.000408,
+        "upstream_inference_completions_cost": 0.00072
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-4e5a-7369-b339-e6fc98631c55",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/openai.chat.completions.create:8hrERAtlIuTQVDQbHY8fFE6fLeoDMfYyyO8dCerUYXc",
+    "op_display_name": "openai.chat.completions.create",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:33.530508+00:00",
+    "inputs": {
+      "self": {
+        "client": {
+          "base_url": "https://openrouter.ai/api/v1/",
+          "version": "2.14.0"
+        }
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Based on the following context, answer the question concisely.\n\nContext: NVIDIA has a platform strategy, bringing together hardware, systems, software, algorithms, libraries, and services to create unique value for the markets we serve.\n\nQuestion: How does NVIDIA's platform strategy contribute to the markets it serves?\n\nAnswer:"
+        }
+      ],
+      "model": "anthropic/claude-3.5-sonnet",
+      "max_tokens": 150,
+      "temperature": 0,
+      "timeout": "NOT_GIVEN"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Based on the following context, answer the question concisely.\n\nContext: NVIDIA has a platform strategy, bringing together hardware, systems, software, algorithms, libraries, and services to create unique value for the markets we serve.\n\nQuestion: How does NVIDIA's platform strategy contribute to the markets it serves?\n\nAnswer:"
+      }
+    ],
+    "output": "NVIDIA's platform strategy creates unique value by integrating multiple components (hardware, systems, software, algorithms, libraries, and services) into a comprehensive ecosystem for its target markets.",
+    "temperature": 0,
+    "max_tokens": 150,
+    "usage": {
+      "prompt_tokens": 74,
+      "completion_tokens": 39,
+      "requests": 1,
+      "total_tokens": 113,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost": 0.001614,
+      "is_byok": false,
+      "cost_details": {
+        "upstream_inference_cost": null,
+        "upstream_inference_prompt_cost": 0.000444,
+        "upstream_inference_completions_cost": 0.00117
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-4e59-72a7-81c5-45d31448971d",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/run_openrouter_inference:80Sb8kSXN4xh2MzakqCmUY6Dj8xpcb6BzblEFSgSzpU",
+    "op_display_name": "run_openrouter_inference",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:33.529840+00:00",
+    "inputs": {
+      "client": "<openai.OpenAI object at 0x17dc4f5b0>",
+      "model": "anthropic/claude-3.5-sonnet",
+      "question": "How does NVIDIA's platform strategy contribute to the markets it serves?",
+      "context": "NVIDIA has a platform strategy, bringing together hardware, systems, software, algorithms, libraries, and services to create unique value for the markets we serve."
+    },
+    "messages": [],
+    "output": "NVIDIA's platform strategy creates unique value by integrating multiple components (hardware, systems, software, algorithms, libraries, and services) into a comprehensive ecosystem for its target markets.",
+    "temperature": null,
+    "max_tokens": null,
+    "usage": {
+      "prompt_tokens": 74,
+      "completion_tokens": 39,
+      "requests": 1,
+      "total_tokens": 113,
+      "cost": 0.001614,
+      "is_byok": 0,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_prompt_cost": 0.000444,
+        "upstream_inference_completions_cost": 0.00117
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-476d-7051-a065-a6876a1a910d",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/openai.chat.completions.create:8hrERAtlIuTQVDQbHY8fFE6fLeoDMfYyyO8dCerUYXc",
+    "op_display_name": "openai.chat.completions.create",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:31.757802+00:00",
+    "inputs": {
+      "self": {
+        "client": {
+          "base_url": "https://openrouter.ai/api/v1/",
+          "version": "2.14.0"
+        }
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Based on the following context, answer the question concisely.\n\nContext: Our invention of the GPU in 1999 defined modern computer graphics and established NVIDIA as the leader in computer graphics.\n\nQuestion: What significant invention did NVIDIA create in 1999?\n\nAnswer:"
+        }
+      ],
+      "model": "anthropic/claude-3.5-sonnet",
+      "max_tokens": 150,
+      "temperature": 0,
+      "timeout": "NOT_GIVEN"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Based on the following context, answer the question concisely.\n\nContext: Our invention of the GPU in 1999 defined modern computer graphics and established NVIDIA as the leader in computer graphics.\n\nQuestion: What significant invention did NVIDIA create in 1999?\n\nAnswer:"
+      }
+    ],
+    "output": "NVIDIA invented the GPU (Graphics Processing Unit) in 1999.",
+    "temperature": 0,
+    "max_tokens": 150,
+    "usage": {
+      "prompt_tokens": 66,
+      "completion_tokens": 18,
+      "requests": 1,
+      "total_tokens": 84,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost": 0.000936,
+      "is_byok": false,
+      "cost_details": {
+        "upstream_inference_cost": null,
+        "upstream_inference_prompt_cost": 0.000396,
+        "upstream_inference_completions_cost": 0.00054
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-476d-7830-8fa6-1af12db1ec5d",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/run_openrouter_inference:80Sb8kSXN4xh2MzakqCmUY6Dj8xpcb6BzblEFSgSzpU",
+    "op_display_name": "run_openrouter_inference",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:31.757160+00:00",
+    "inputs": {
+      "client": "<openai.OpenAI object at 0x17dc4f5b0>",
+      "model": "anthropic/claude-3.5-sonnet",
+      "question": "What significant invention did NVIDIA create in 1999?",
+      "context": "Our invention of the GPU in 1999 defined modern computer graphics and established NVIDIA as the leader in computer graphics."
+    },
+    "messages": [],
+    "output": "NVIDIA invented the GPU (Graphics Processing Unit) in 1999.",
+    "temperature": null,
+    "max_tokens": null,
+    "usage": {
+      "prompt_tokens": 66,
+      "completion_tokens": 18,
+      "requests": 1,
+      "total_tokens": 84,
+      "cost": 0.000936,
+      "is_byok": 0,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_prompt_cost": 0.000396,
+        "upstream_inference_completions_cost": 0.00054
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-3f20-71e0-be1f-a7ad3b945e73",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/openai.chat.completions.create:8hrERAtlIuTQVDQbHY8fFE6fLeoDMfYyyO8dCerUYXc",
+    "op_display_name": "openai.chat.completions.create",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:29.632845+00:00",
+    "inputs": {
+      "self": {
+        "client": {
+          "base_url": "https://openrouter.ai/api/v1/",
+          "version": "2.14.0"
+        }
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Based on the following context, answer the question concisely.\n\nContext: Some of the most recent applications of GPU-powered deep learning include recommendation systems, which are AI algorithms trained to understand the preferences, previous decisions, and characteristics of people and products using data gathered about their interactions, large language models, which can recognize, summarize, translate, predict and generate text and other content based on knowledge gained from massive datasets, and generative AI, which uses algorithms that create new content, including audio, code, images, text, simulations, and videos, based on the data they have been trained on.\n\nQuestion: What are some of the recent applications of GPU-powered deep learning as mentioned by NVIDIA?\n\nAnswer:"
+        }
+      ],
+      "model": "anthropic/claude-3.5-sonnet",
+      "max_tokens": 150,
+      "temperature": 0,
+      "timeout": "NOT_GIVEN"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Based on the following context, answer the question concisely.\n\nContext: Some of the most recent applications of GPU-powered deep learning include recommendation systems, which are AI algorithms trained to understand the preferences, previous decisions, and characteristics of people and products using data gathered about their interactions, large language models, which can recognize, summarize, translate, predict and generate text and other content based on knowledge gained from massive datasets, and generative AI, which uses algorithms that create new content, including audio, code, images, text, simulations, and videos, based on the data they have been trained on.\n\nQuestion: What are some of the recent applications of GPU-powered deep learning as mentioned by NVIDIA?\n\nAnswer:"
+      }
+    ],
+    "output": "According to the context, the three main recent applications of GPU-powered deep learning are:\n1. Recommendation systems\n2. Large language models\n3. Generative AI",
+    "temperature": 0,
+    "max_tokens": 150,
+    "usage": {
+      "prompt_tokens": 156,
+      "completion_tokens": 40,
+      "requests": 1,
+      "total_tokens": 196,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost": 0.002136,
+      "is_byok": false,
+      "cost_details": {
+        "upstream_inference_cost": null,
+        "upstream_inference_prompt_cost": 0.000936,
+        "upstream_inference_completions_cost": 0.0012
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-3f20-7f90-b46c-4a825c29c72f",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/run_openrouter_inference:80Sb8kSXN4xh2MzakqCmUY6Dj8xpcb6BzblEFSgSzpU",
+    "op_display_name": "run_openrouter_inference",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:29.632150+00:00",
+    "inputs": {
+      "client": "<openai.OpenAI object at 0x17dc4f5b0>",
+      "model": "anthropic/claude-3.5-sonnet",
+      "question": "What are some of the recent applications of GPU-powered deep learning as mentioned by NVIDIA?",
+      "context": "Some of the most recent applications of GPU-powered deep learning include recommendation systems, which are AI algorithms trained to understand the preferences, previous decisions, and characteristics of people and products using data gathered about their interactions, large language models, which can recognize, summarize, translate, predict and generate text and other content based on knowledge gained from massive datasets, and generative AI, which uses algorithms that create new content, including audio, code, images, text, simulations, and videos, based on the data they have been trained on."
+    },
+    "messages": [],
+    "output": "According to the context, the three main recent applications of GPU-powered deep learning are:\n1. Recommendation systems\n2. Large language models\n3. Generative AI",
+    "temperature": null,
+    "max_tokens": null,
+    "usage": {
+      "prompt_tokens": 156,
+      "completion_tokens": 40,
+      "requests": 1,
+      "total_tokens": 196,
+      "cost": 0.002136,
+      "is_byok": 0,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_prompt_cost": 0.000936,
+        "upstream_inference_completions_cost": 0.0012
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-350c-73ac-aff2-727f502f7b4b",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/openai.chat.completions.create:8hrERAtlIuTQVDQbHY8fFE6fLeoDMfYyyO8dCerUYXc",
+    "op_display_name": "openai.chat.completions.create",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:27.052095+00:00",
+    "inputs": {
+      "self": {
+        "client": {
+          "base_url": "https://openrouter.ai/api/v1/",
+          "version": "2.14.0"
+        }
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Based on the following context, answer the question concisely.\n\nContext: Since our original focus on PC graphics, we have expanded to several other large and important computationally intensive fields.\n\nQuestion: What area did NVIDIA initially focus on before expanding to other computationally intensive fields?\n\nAnswer:"
+        }
+      ],
+      "model": "anthropic/claude-3.5-sonnet",
+      "max_tokens": 150,
+      "temperature": 0,
+      "timeout": "NOT_GIVEN"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Based on the following context, answer the question concisely.\n\nContext: Since our original focus on PC graphics, we have expanded to several other large and important computationally intensive fields.\n\nQuestion: What area did NVIDIA initially focus on before expanding to other computationally intensive fields?\n\nAnswer:"
+      }
+    ],
+    "output": "PC graphics was NVIDIA's initial focus.",
+    "temperature": 0,
+    "max_tokens": 150,
+    "usage": {
+      "prompt_tokens": 70,
+      "completion_tokens": 12,
+      "requests": 1,
+      "total_tokens": 82,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost": 0.00078,
+      "is_byok": false,
+      "cost_details": {
+        "upstream_inference_cost": null,
+        "upstream_inference_prompt_cost": 0.00042,
+        "upstream_inference_completions_cost": 0.00036
+      }
+    }
+  },
+  {
+    "id": "019bf8f3-350b-7828-8429-6a853e57a143",
+    "op_name": "weave:///byyoung3/test-financial-qa/op/run_openrouter_inference:80Sb8kSXN4xh2MzakqCmUY6Dj8xpcb6BzblEFSgSzpU",
+    "op_display_name": "run_openrouter_inference",
+    "model": "anthropic/claude-3.5-sonnet",
+    "time": "2026-01-26T06:17:27.051498+00:00",
+    "inputs": {
+      "client": "<openai.OpenAI object at 0x17dc4f5b0>",
+      "model": "anthropic/claude-3.5-sonnet",
+      "question": "What area did NVIDIA initially focus on before expanding to other computationally intensive fields?",
+      "context": "Since our original focus on PC graphics, we have expanded to several other large and important computationally intensive fields."
+    },
+    "messages": [],
+    "output": "PC graphics was NVIDIA's initial focus.",
+    "temperature": null,
+    "max_tokens": null,
+    "usage": {
+      "prompt_tokens": 70,
+      "completion_tokens": 12,
+      "requests": 1,
+      "total_tokens": 82,
+      "cost": 0.00078,
+      "is_byok": 0,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_prompt_cost": 0.00042,
+        "upstream_inference_completions_cost": 0.00036
+      }
+    }
+  }
+]

@@ -1,0 +1,70 @@
+# #!/usr/bin/env python3
+# import sys
+# import time
+# import linecache
+# import os
+
+# def trace_lines(frame, event, arg):
+#     if event == "line":
+#         lineno = frame.f_lineno
+#         filename = frame.f_code.co_filename
+#         line = linecache.getline(filename, lineno).strip()
+#         print(f"\033[1;32mLine {lineno}:\033[0m {line}", flush=True)  # flush here
+#         time.sleep(0.05)
+#     return trace_lines
+
+# def run_script(path):
+#     if not os.path.isfile(path):
+#         print(f"File not found: {path}", flush=True)
+#         return
+#     sys.settrace(trace_lines)
+#     try:
+#         with open(path) as f:
+#             code = compile(f.read(), path, 'exec')
+#             exec(code, {})
+#     finally:
+#         sys.settrace(None)
+
+# if __name__ == "__main__":
+#     if len(sys.argv) < 2:
+#         print("Usage: pystatus <script.py>", flush=True)
+#         sys.exit(1)
+#     run_script(sys.argv[1])
+
+#!/usr/bin/env python3
+import sys
+import linecache
+import os
+
+import runpy
+
+# def trace_lines(frame, event, arg):
+#     if event == "line":
+#         lineno = frame.f_lineno
+#         filename = frame.f_code.co_filename
+#         line = linecache.getline(filename, lineno).strip()
+#         print(f"\033[1;32mLine {lineno}:\033[0m {line}", flush=True)
+        
+#     return trace_lines
+script_path = os.path.abspath(sys.argv[1])
+
+def trace_lines(frame, event, arg):
+    if event == "line" and os.path.abspath(frame.f_code.co_filename) == script_path:
+        line = linecache.getline(frame.f_code.co_filename, frame.f_lineno).strip()
+        print(f"\033[1;32mLine {frame.f_lineno}:\033[0m {line}", flush=True)
+    return trace_lines
+if len(sys.argv) < 2:
+    print("Usage: pystatus <script.py>")
+    sys.exit(1)
+
+script = sys.argv[1]
+if not os.path.isfile(script):
+    print(f"File not found: {script}")
+    sys.exit(1)
+
+# Trace and run the script in the same Python (active conda env)
+sys.settrace(trace_lines)
+try:
+    runpy.run_path(script, run_name="__main__")
+finally:
+    sys.settrace(None)

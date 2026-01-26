@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weave Trace Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .controls {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .controls label {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .controls select {
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid #3a3a3a;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            max-width: 300px;
+        }
+
+        .controls select:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin-left: auto;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .trace-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .trace-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            transition: border-color 0.2s;
+            position: relative;
+        }
+
+        .trace-card:hover {
+            border-color: #3a3a3a;
+        }
+
+        .trace-card.selected {
+            border-color: #4a9eff;
+            background: #1a2a3a;
+        }
+
+        .trace-checkbox {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .trace-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .trace-meta {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .model-badge {
+            background: #2a4a7c;
+            color: #6db3ff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .time {
+            color: #888;
+            font-size: 13px;
+        }
+
+        .trace-id {
+            color: #666;
+            font-size: 12px;
+            font-family: monospace;
+        }
+
+        .usage-info {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .usage-item {
+            display: flex;
+            gap: 5px;
+        }
+
+        .usage-label {
+            color: #666;
+        }
+
+        .messages-section {
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            color: #aaa;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .message {
+            background: #0f0f0f;
+            border-left: 3px solid #3a3a3a;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .message-role {
+            color: #4a9eff;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .message-content {
+            color: #ccc;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .output-section {
+            background: #0f0f0f;
+            border-left: 3px solid #2a7c4a;
+            padding: 12px 15px;
+            border-radius: 4px;
+        }
+
+        .output-content {
+            color: #ccc;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .no-data {
+            color: #666;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+            font-size: 16px;
+        }
+
+        .error {
+            background: #3a1a1a;
+            border: 1px solid #5a2a2a;
+            color: #ff6b6b;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Weave Trace Viewer</h1>
+
+        <!-- Project Selection -->
+        <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+            <label style="color: #aaa; font-size: 14px;">Project:</label>
+            <select id="project-select" style="flex: 1; max-width: 400px; padding: 8px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px;">
+                <option value="">No projects loaded</option>
+            </select>
+            <input type="text" id="new-project-input" placeholder="e.g., username/project-name" style="flex: 1; max-width: 300px; padding: 8px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px;">
+            <button id="fetch-new-btn" style="padding: 8px 16px; background: #4a9eff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Fetch New Project
+            </button>
+            <button id="refresh-btn" style="padding: 8px 16px; background: #2a7c4a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Refresh Current
+            </button>
+        </div>
+
+        <div class="controls">
+            <label for="op-filter">Filter by Operation:</label>
+            <select id="op-filter">
+                <option value="all">All Operations</option>
+            </select>
+
+            <label for="model-filter">Filter by Model:</label>
+            <select id="model-filter">
+                <option value="all">All Models</option>
+            </select>
+
+            <button id="select-all-btn" style="margin-left: 20px; padding: 8px 16px; background: #2a7c4a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Select All Filtered
+            </button>
+
+            <button id="export-btn" style="padding: 8px 16px; background: #4a9eff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Export Selected to Test Set (<span id="selected-count">0</span>)
+            </button>
+
+            <button id="open-inference-btn" style="padding: 8px 16px; background: #7c4a9e; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Run Weak Models
+            </button>
+
+            <button id="open-eval-btn" style="padding: 8px 16px; background: #9e6a4a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Run Evaluation
+            </button>
+
+            <a href="judge_manager.html" target="_blank" style="padding: 8px 16px; background: #4a5a9e; color: white; border: none; border-radius: 4px; text-decoration: none; display: inline-block;">
+                Manage Judges
+            </a>
+
+            <div class="stats">
+                <div>Total: <span id="total-count">0</span></div>
+                <div>Shown: <span id="shown-count">0</span></div>
+            </div>
+        </div>
+
+        <div id="trace-list" class="trace-list">
+            <div class="loading">Loading traces...</div>
+        </div>
+
+        <!-- Weak Model Inference Panel -->
+        <div id="inference-panel" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; padding: 40px;">
+            <div style="max-width: 800px; margin: 0 auto; background: #1a1a1a; border-radius: 8px; padding: 30px; max-height: 90vh; overflow-y: auto;">
+                <h2 style="margin-top: 0; color: #fff;">Run Weak Model Inference</h2>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="color: #aaa; display: block; margin-bottom: 10px;">Select Strong Model Export:</label>
+                    <select id="strong-export-select" style="width: 100%; padding: 8px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px;">
+                        <option value="">Loading...</option>
+                    </select>
+                    <div style="color: #666; font-size: 12px; margin-top: 5px;">
+                        Select which strong model traces to run weak models on
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="color: #aaa; display: block; margin-bottom: 10px;">W&B Models:</label>
+                    <div id="model-list" style="max-height: 200px; overflow-y: auto; background: #0f0f0f; padding: 15px; border-radius: 4px;">
+                        <!-- Models will be populated here -->
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="color: #aaa; display: block; margin-bottom: 10px;">OpenRouter Models (one per line):</label>
+                    <textarea id="custom-models-input" placeholder="e.g., google/gemini-2.5-flash&#10;anthropic/claude-3.5-sonnet" style="width: 100%; height: 100px; padding: 8px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px; font-family: monospace; font-size: 12px; resize: vertical;"></textarea>
+                    <div style="color: #666; font-size: 12px; margin-top: 5px;">
+                        Enter custom model strings from OpenRouter or other providers
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="color: #aaa; display: block; margin-bottom: 10px;">Number of Examples:</label>
+                    <input type="number" id="num-examples" min="1" value="10" style="width: 100%; padding: 8px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px;">
+                    <div style="color: #666; font-size: 12px; margin-top: 5px;">
+                        Will use first N examples from the selected export
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button id="run-inference-btn" style="flex: 1; padding: 12px; background: #2a7c4a; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
+                        Run Inference
+                    </button>
+                    <button id="close-panel-btn" style="padding: 12px 24px; background: #5a2a2a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Cancel
+                    </button>
+                </div>
+
+                <div id="inference-progress" style="display: none; margin-top: 20px; padding: 15px; background: #0f0f0f; border-radius: 4px;">
+                    <div style="color: #4a9eff; margin-bottom: 10px;">Running inference...</div>
+                    <div id="progress-text" style="color: #888; font-family: monospace; font-size: 12px; white-space: pre-wrap;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluation Panel -->
+        <div id="eval-panel" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; padding: 40px;">
+            <div style="max-width: 800px; margin: 0 auto; background: #1a1a1a; border-radius: 8px; padding: 30px; max-height: 90vh; overflow-y: auto;">
+                <h2 style="margin-top: 0; color: #fff;">Run Evaluation</h2>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="color: #aaa; display: block; margin-bottom: 10px;">Select Weak Model Results:</label>
+                    <div id="eval-model-list" style="max-height: 200px; overflow-y: auto; background: #0f0f0f; padding: 15px; border-radius: 4px;">
+                        <!-- Files populated dynamically -->
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="color: #aaa; display: block; margin-bottom: 10px;">Select Judge:</label>
+                    <select id="eval-judge" style="width: 100%; padding: 8px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px;">
+                        <!-- Judges populated dynamically -->
+                    </select>
+                    <div style="color: #666; font-size: 12px; margin-top: 5px;">
+                        <a href="judge_manager.html" target="_blank" style="color: #4a9eff;">Create/manage judges</a>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button id="run-eval-btn" style="flex: 1; padding: 12px; background: #2a7c4a; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
+                        Run Evaluation
+                    </button>
+                    <button id="close-eval-btn" style="padding: 12px 24px; background: #5a2a2a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Close
+                    </button>
+                </div>
+
+                <div id="eval-progress" style="display: none; margin-top: 20px; padding: 15px; background: #0f0f0f; border-radius: 4px;">
+                    <div style="color: #4a9eff; margin-bottom: 10px;">Running evaluations...</div>
+                    <div id="eval-progress-bar" style="width: 100%; height: 6px; background: #2a2a2a; border-radius: 3px; margin-bottom: 15px; overflow: hidden;">
+                        <div id="eval-progress-fill" style="height: 100%; background: #2a7c4a; width: 0%; transition: width 0.3s;"></div>
+                    </div>
+                    <div id="eval-progress-text" style="color: #888; font-family: monospace; font-size: 12px; white-space: pre-wrap;"></div>
+                    <div id="eval-results" style="margin-top: 15px; display: none;">
+                        <div style="color: #4a9eff; margin-bottom: 10px; font-weight: bold;">Completed Evaluations:</div>
+                        <div id="eval-results-links" style="color: #ccc;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const AVAILABLE_MODELS = [
+            "openai/gpt-oss-120b",
+            "openai/gpt-oss-20b",
+            "zai-org/GLM-4.5",
+            "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+            "microsoft/Phi-4-mini-instruct",
+            "meta-llama/Llama-3.3-70B-Instruct",
+            "meta-llama/Llama-3.1-8B-Instruct",
+            "Qwen/Qwen3-235B-A22B-Instruct-2507",
+            "deepseek-ai/DeepSeek-V3.1",
+            "deepseek-ai/DeepSeek-R1-0528",
+            "Qwen/Qwen3-235B-A22B-Thinking-2507",
+            "Qwen/Qwen3-Coder-480B-A35B-Instruct",
+        ];
+
+        let allTraces = [];
+        let currentOpFilter = 'all';
+        let currentModelFilter = 'all';
+        let selectedTraces = new Set();
+        let selectedModels = new Set();
+
+        let currentProject = null;
+
+        // Load projects list
+        async function loadProjects() {
+            try {
+                const response = await fetch('http://localhost:5001/list_projects');
+                const data = await response.json();
+                const select = document.getElementById('project-select');
+
+                if (data.projects.length === 0) {
+                    select.innerHTML = '<option value="">No projects - fetch one to start</option>';
+                } else {
+                    select.innerHTML = data.projects.map(p =>
+                        `<option value="${p.name}">${p.name} (${p.trace_count} traces)</option>`
+                    ).join('');
+
+                    // Auto-select first project and load it
+                    if (data.projects.length > 0) {
+                        currentProject = data.projects[0].name;
+                        select.value = currentProject;
+                        await loadTraces(currentProject);
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load projects:', e);
+            }
+        }
+
+        // Load traces from selected project
+        async function loadTraces(projectName) {
+            const projectPath = projectName.replace('/', '_');
+            const tracesUrl = `projects/${projectPath}/traces_data.json`;
+
+            document.getElementById('trace-list').innerHTML = '<div class="loading">Loading traces...</div>';
+
+            try {
+                const response = await fetch(tracesUrl);
+                if (!response.ok) {
+                    throw new Error(`Failed to load traces for ${projectName}`);
+                }
+
+                const data = await response.json();
+                allTraces = data;
+                currentProject = projectName;
+                populateFilters();
+                renderTraces();
+            } catch (error) {
+                document.getElementById('trace-list').innerHTML = `
+                    <div class="error">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Fetch new project
+        document.getElementById('fetch-new-btn').addEventListener('click', async () => {
+            const projectName = document.getElementById('new-project-input').value.trim();
+            if (!projectName) {
+                alert('Please enter a project name (e.g., username/project-name)');
+                return;
+            }
+
+            document.getElementById('trace-list').innerHTML = '<div class="loading">Fetching traces from Weave...</div>';
+
+            try {
+                const response = await fetch('http://localhost:5001/fetch_traces', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ project_name: projectName })
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert(result.message);
+                    document.getElementById('new-project-input').value = '';
+                    await loadProjects(); // Reload project list
+                } else {
+                    alert(`Error: ${result.error}`);
+                    document.getElementById('trace-list').innerHTML = `<div class="error">${result.error}</div>`;
+                }
+            } catch (e) {
+                alert('Failed to fetch traces: ' + e.message);
+                document.getElementById('trace-list').innerHTML = `<div class="error">${e.message}</div>`;
+            }
+        });
+
+        // Refresh current project
+        document.getElementById('refresh-btn').addEventListener('click', async () => {
+            if (!currentProject) {
+                alert('No project selected');
+                return;
+            }
+
+            document.getElementById('trace-list').innerHTML = '<div class="loading">Refreshing traces from Weave...</div>';
+
+            try {
+                const response = await fetch('http://localhost:5001/fetch_traces', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ project_name: currentProject })
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert(result.message);
+                    await loadTraces(currentProject); // Reload traces
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (e) {
+                alert('Failed to refresh traces: ' + e.message);
+            }
+        });
+
+        // Project selection change
+        document.getElementById('project-select').addEventListener('change', async (e) => {
+            const projectName = e.target.value;
+            if (projectName) {
+                await loadTraces(projectName);
+            }
+        });
+
+        // Initialize - load projects
+        loadProjects();
+
+        // Populate filter dropdowns
+        function populateFilters() {
+            // Populate operation filter
+            const ops = new Set(allTraces.map(t => t.op_display_name || 'unknown'));
+            const opSelect = document.getElementById('op-filter');
+            [...ops].sort().forEach(op => {
+                const option = document.createElement('option');
+                option.value = op;
+                option.textContent = op;
+                opSelect.appendChild(option);
+            });
+
+            // Populate model filter
+            const models = new Set(allTraces.map(t => t.model));
+            const modelSelect = document.getElementById('model-filter');
+            [...models].sort().forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                modelSelect.appendChild(option);
+            });
+        }
+
+        // Filter change handlers
+        document.getElementById('op-filter').addEventListener('change', (e) => {
+            currentOpFilter = e.target.value;
+            renderTraces();
+        });
+
+        document.getElementById('model-filter').addEventListener('change', (e) => {
+            currentModelFilter = e.target.value;
+            renderTraces();
+        });
+
+        // Render traces
+        function renderTraces() {
+            let filteredTraces = allTraces;
+
+            // Apply operation filter
+            if (currentOpFilter !== 'all') {
+                filteredTraces = filteredTraces.filter(t => t.op_display_name === currentOpFilter);
+            }
+
+            // Apply model filter
+            if (currentModelFilter !== 'all') {
+                filteredTraces = filteredTraces.filter(t => t.model === currentModelFilter);
+            }
+
+            document.getElementById('total-count').textContent = allTraces.length;
+            document.getElementById('shown-count').textContent = filteredTraces.length;
+
+            const traceList = document.getElementById('trace-list');
+
+            if (filteredTraces.length === 0) {
+                traceList.innerHTML = '<div class="no-data">No traces found</div>';
+                return;
+            }
+
+            traceList.innerHTML = filteredTraces.map(trace => `
+                <div class="trace-card ${selectedTraces.has(trace.id) ? 'selected' : ''}" data-trace-id="${trace.id}">
+                    <input type="checkbox" class="trace-checkbox" ${selectedTraces.has(trace.id) ? 'checked' : ''} data-trace-id="${trace.id}">
+                    <div class="trace-header">
+                        <div class="trace-meta">
+                            <span class="model-badge">${trace.op_display_name || 'unknown'}</span>
+                            <span class="model-badge">${trace.model}</span>
+                            <span class="time">${formatTime(trace.time)}</span>
+                        </div>
+                        <div class="trace-id">${trace.id}</div>
+                    </div>
+
+                    ${trace.usage && (trace.usage.total_tokens || trace.usage.requests) ? `
+                        <div class="usage-info">
+                            ${trace.usage.requests ? `<div class="usage-item"><span class="usage-label">Requests:</span> ${trace.usage.requests}</div>` : ''}
+                            ${trace.usage.prompt_tokens ? `<div class="usage-item"><span class="usage-label">Prompt:</span> ${trace.usage.prompt_tokens}</div>` : ''}
+                            ${trace.usage.completion_tokens ? `<div class="usage-item"><span class="usage-label">Completion:</span> ${trace.usage.completion_tokens}</div>` : ''}
+                            ${trace.usage.total_tokens ? `<div class="usage-item"><span class="usage-label">Total:</span> ${trace.usage.total_tokens}</div>` : ''}
+                        </div>
+                    ` : ''}
+
+                    ${trace.messages && Array.isArray(trace.messages) && trace.messages.length > 0 ? `
+                        <div class="messages-section">
+                            <div class="section-title">Messages</div>
+                            ${trace.messages.map(msg => `
+                                <div class="message">
+                                    <div class="message-role">${msg.role || 'unknown'}</div>
+                                    <div class="message-content">${escapeHtml(msg.content || '')}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+
+                    ${trace.child_calls && trace.child_calls.length > 0 ? `
+                        <div class="messages-section">
+                            <div class="section-title">Child API Calls (${trace.child_calls.length})</div>
+                            ${trace.child_calls.map((child, idx) => `
+                                <div style="margin-bottom: 15px; border-left: 3px solid #4a4a4a; padding-left: 10px;">
+                                    <div style="color: #888; font-size: 12px; margin-bottom: 8px;">
+                                        Call ${idx + 1}: ${child.model || 'N/A'} (${child.id})
+                                    </div>
+                                    ${child.messages && Array.isArray(child.messages) && child.messages.length > 0 ? `
+                                        ${child.messages.map(msg => `
+                                            <div class="message">
+                                                <div class="message-role">${msg.role || 'unknown'}</div>
+                                                <div class="message-content">${escapeHtml(msg.content || '')}</div>
+                                            </div>
+                                        `).join('')}
+                                        ${child.output ? `
+                                            <div class="output-section" style="margin-top: 8px;">
+                                                <div style="color: #888; font-size: 11px; margin-bottom: 4px;">Response:</div>
+                                                <div class="output-content">${escapeHtml(child.output)}</div>
+                                            </div>
+                                        ` : ''}
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+
+                    ${(!trace.messages || trace.messages.length === 0) && (!trace.child_calls || trace.child_calls.length === 0) && trace.inputs && Object.keys(trace.inputs).length > 0 ? `
+                        <div class="messages-section">
+                            <div class="section-title">Inputs</div>
+                            <div class="message">
+                                <div class="message-content">${escapeHtml(JSON.stringify(trace.inputs, null, 2))}</div>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${trace.output ? `
+                        <div class="section-title">Output</div>
+                        <div class="output-section">
+                            <div class="output-content">${escapeHtml(trace.output)}</div>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Format timestamp
+        function formatTime(isoString) {
+            if (!isoString) return 'Unknown';
+            const date = new Date(isoString);
+            return date.toLocaleString();
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Handle checkbox clicks
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('trace-checkbox')) {
+                const traceId = e.target.dataset.traceId;
+                if (e.target.checked) {
+                    selectedTraces.add(traceId);
+                } else {
+                    selectedTraces.delete(traceId);
+                }
+                updateSelectedCount();
+                renderTraces();
+            }
+        });
+
+        // Select all filtered traces
+        document.getElementById('select-all-btn').addEventListener('click', () => {
+            // Clear previous selections first
+            selectedTraces.clear();
+            // Add all filtered traces
+            const filteredTraces = getFilteredTraces();
+            filteredTraces.forEach(trace => selectedTraces.add(trace.id));
+            updateSelectedCount();
+            renderTraces();
+        });
+
+        // Export selected traces
+        document.getElementById('export-btn').addEventListener('click', async () => {
+            const selectedData = allTraces.filter(t => selectedTraces.has(t.id));
+
+            if (selectedData.length === 0) {
+                alert('No traces selected!');
+                return;
+            }
+
+            // Filter to only OpenAI completion traces (exclude wrapper function traces)
+            const completionTraces = selectedData.filter(t => {
+                const opName = t.op_name || '';
+                const opDisplayName = t.op_display_name || '';
+                // Only include traces from openai.chat.completions.create
+                return opDisplayName === 'openai.chat.completions.create' ||
+                       opName.includes('openai.chat.completions.create');
+            });
+
+            if (completionTraces.length === 0) {
+                alert('No OpenAI completion traces selected! Please select traces from actual API calls, not wrapper functions.');
+                return;
+            }
+
+            if (completionTraces.length < selectedData.length) {
+                const filtered = selectedData.length - completionTraces.length;
+                if (!confirm(`Filtered out ${filtered} wrapper/non-completion traces. Continue with ${completionTraces.length} OpenAI completion traces?`)) {
+                    return;
+                }
+            }
+
+            // Generate default nickname from completion traces
+            const models = [...new Set(completionTraces.map(t => t.model).filter(Boolean))];
+            const defaultNickname = models.length > 0
+                ? `${models[0].replace(/\//g, '_')}_${completionTraces.length}traces`
+                : `export_${completionTraces.length}traces`;
+
+            // Prompt for nickname
+            const nickname = prompt('Enter a nickname for this export:', defaultNickname);
+            if (!nickname) {
+                return; // User cancelled
+            }
+
+            // Save via backend
+            try {
+                const response = await fetch('http://localhost:5001/export_strong_traces', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        traces: completionTraces,
+                        nickname: nickname
+                    })
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert(`✓ Exported ${result.count} traces to strong_exports/${result.filename}`);
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (e) {
+                console.error('Export error:', e);
+                alert('Failed to export traces: ' + e.message);
+            }
+        });
+
+        // Update selected count
+        function updateSelectedCount() {
+            document.getElementById('selected-count').textContent = selectedTraces.size;
+        }
+
+        // Get filtered traces
+        function getFilteredTraces() {
+            let filtered = allTraces;
+            if (currentOpFilter !== 'all') {
+                filtered = filtered.filter(t => t.op_display_name === currentOpFilter);
+            }
+            if (currentModelFilter !== 'all') {
+                filtered = filtered.filter(t => t.model === currentModelFilter);
+            }
+            return filtered;
+        }
+
+        // Open inference panel
+        document.getElementById('open-inference-btn').addEventListener('click', async () => {
+            document.getElementById('inference-panel').style.display = 'block';
+            populateModelList();
+            await loadStrongExports();
+        });
+
+        // Load strong exports
+        async function loadStrongExports() {
+            try {
+                const response = await fetch('http://localhost:5001/list_strong_exports');
+                const data = await response.json();
+                const select = document.getElementById('strong-export-select');
+
+                if (data.files.length === 0) {
+                    select.innerHTML = '<option value="">No exports found - export traces first!</option>';
+                } else {
+                    select.innerHTML = data.files.map(f => `<option value="${f}">${f.replace('.json', '')}</option>`).join('');
+                }
+            } catch (e) {
+                console.error('Failed to load strong exports:', e);
+                document.getElementById('strong-export-select').innerHTML = '<option value="">Error loading exports</option>';
+            }
+        }
+
+        // Close inference panel
+        document.getElementById('close-panel-btn').addEventListener('click', () => {
+            document.getElementById('inference-panel').style.display = 'none';
+        });
+
+        // Populate model list
+        function populateModelList() {
+            const modelList = document.getElementById('model-list');
+            modelList.innerHTML = AVAILABLE_MODELS.map(model => `
+                <label style="display: block; color: #ccc; margin-bottom: 8px; cursor: pointer;">
+                    <input type="checkbox" class="model-checkbox" value="${model}" style="margin-right: 8px;">
+                    ${model}
+                </label>
+            `).join('');
+
+            // Handle model selection
+            modelList.querySelectorAll('.model-checkbox').forEach(cb => {
+                cb.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        selectedModels.add(e.target.value);
+                    } else {
+                        selectedModels.delete(e.target.value);
+                    }
+                });
+            });
+        }
+
+        // Run inference
+        document.getElementById('run-inference-btn').addEventListener('click', async () => {
+            const numExamples = parseInt(document.getElementById('num-examples').value);
+            const strongExportFile = document.getElementById('strong-export-select').value;
+
+            // Get custom models from textarea
+            const customModelsText = document.getElementById('custom-models-input').value;
+            const customModels = customModelsText
+                .split('\n')
+                .map(m => m.trim())
+                .filter(m => m.length > 0);
+
+            // Combine selected W&B models and custom models
+            const allModels = [...Array.from(selectedModels), ...customModels];
+
+            if (allModels.length === 0) {
+                alert('Please select at least one W&B model or enter custom models!');
+                return;
+            }
+
+            if (!strongExportFile) {
+                alert('Please select a strong model export file!');
+                return;
+            }
+
+            // Show progress
+            document.getElementById('inference-progress').style.display = 'block';
+            const progressText = document.getElementById('progress-text');
+            progressText.textContent = `Starting inference...\n`;
+            progressText.textContent += `Strong Export: ${strongExportFile}\n`;
+            progressText.textContent += `Models: ${allModels.join(', ')}\n`;
+            progressText.textContent += `Max Examples: ${numExamples}\n\n`;
+
+            // Call backend API
+            try {
+                const response = await fetch('http://localhost:5001/run_inference', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        models: allModels,
+                        strong_export_file: strongExportFile,
+                        num_examples: numExamples
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                progressText.textContent += `\n✓ Complete!\n`;
+                progressText.textContent += `Results saved to: ${result.files.join(', ')}\n`;
+
+                setTimeout(() => {
+                    document.getElementById('inference-panel').style.display = 'none';
+                    document.getElementById('inference-progress').style.display = 'none';
+                }, 3000);
+
+            } catch (error) {
+                progressText.textContent += `\n✗ Error: ${error.message}\n`;
+                progressText.textContent += `\nNote: You need to run the backend server for inference.\n`;
+                progressText.textContent += `Run: python inference_server.py\n`;
+            }
+        });
+
+        // === EVALUATION PANEL ===
+
+        // Open evaluation panel
+        document.getElementById('open-eval-btn').addEventListener('click', async () => {
+            document.getElementById('eval-panel').style.display = 'block';
+            await populateEvalOptions();
+        });
+
+        // Close evaluation panel
+        document.getElementById('close-eval-btn').addEventListener('click', () => {
+            document.getElementById('eval-panel').style.display = 'none';
+            document.getElementById('eval-progress').style.display = 'none';
+            document.getElementById('eval-results').style.display = 'none';
+            selectedEvalModels.clear();
+        });
+
+        const selectedEvalModels = new Set();
+
+        // Populate evaluation options
+        async function populateEvalOptions() {
+            // Get list of weak model files from server
+            try {
+                const response = await fetch('http://localhost:5001/list_weak_models');
+                const data = await response.json();
+
+                const modelList = document.getElementById('eval-model-list');
+                modelList.innerHTML = data.files.map(f => {
+                    const modelName = (f.weak_model && f.weak_model !== 'unknown')
+                        ? f.weak_model
+                        : f.filename.replace('weak_model_', '').replace('.json', '').replace(/_/g, '/');
+                    const vsText = (f.strong_export && f.strong_export !== 'unknown')
+                        ? ` vs. ${f.strong_export.replace('.json', '')}`
+                        : ' (old format - regenerate to see comparison)';
+
+                    return `
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <label style="flex: 1; color: #ccc; cursor: pointer;">
+                                <input type="checkbox" class="eval-model-checkbox" value="${f.filename}" style="margin-right: 8px;">
+                                <span style="font-weight: 500;">${modelName}</span>
+                                <span style="color: #666; font-size: 11px;">${vsText}</span>
+                            </label>
+                            <button class="download-eval-btn" data-filename="${f.filename}" style="padding: 4px 12px; background: #4a9eff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 10px;">
+                                Download
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+
+                // Handle model selection
+                modelList.querySelectorAll('.eval-model-checkbox').forEach(cb => {
+                    cb.addEventListener('change', (e) => {
+                        if (e.target.checked) {
+                            selectedEvalModels.add(e.target.value);
+                        } else {
+                            selectedEvalModels.delete(e.target.value);
+                        }
+                    });
+                });
+
+                // Handle download buttons
+                modelList.querySelectorAll('.download-eval-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        const filename = e.target.dataset.filename;
+                        await downloadEvalDataset(filename);
+                    });
+                });
+            } catch (e) {
+                console.error('Error loading weak model files:', e);
+            }
+
+            // Load judges from server
+            try {
+                const response = await fetch('http://localhost:5001/list_judges');
+                const data = await response.json();
+                const judges = data.judges || [];
+                const judgeSelect = document.getElementById('eval-judge');
+
+                if (judges.length === 0) {
+                    judgeSelect.innerHTML = '<option value="">No judges defined - create one first</option>';
+                } else {
+                    judgeSelect.innerHTML = judges.map((j, i) => `<option value="${i}">${j.name} (${j.type})</option>`).join('');
+                }
+            } catch (e) {
+                console.error('Error loading judges:', e);
+                document.getElementById('eval-judge').innerHTML = '<option value="">Error loading judges</option>';
+            }
+        }
+
+        // Run evaluation
+        document.getElementById('run-eval-btn').addEventListener('click', async () => {
+            const judgeIndex = document.getElementById('eval-judge').value;
+
+            if (selectedEvalModels.size === 0) {
+                alert('Please select at least one weak model');
+                return;
+            }
+
+            if (!judgeIndex) {
+                alert('Please select a judge');
+                return;
+            }
+
+            // Load judges from server
+            const judgesResponse = await fetch('http://localhost:5001/list_judges');
+            const judgesData = await judgesResponse.json();
+            const judges = judgesData.judges || [];
+            const judge = judges[parseInt(judgeIndex)];
+
+            // Show progress
+            document.getElementById('eval-progress').style.display = 'block';
+            document.getElementById('eval-results').style.display = 'none';
+            const progressText = document.getElementById('eval-progress-text');
+            const progressFill = document.getElementById('eval-progress-fill');
+            const resultsDiv = document.getElementById('eval-results-links');
+
+            progressText.textContent = `Starting evaluations...\n`;
+            progressText.textContent += `Judge: ${judge.name}\n`;
+            progressText.textContent += `Models: ${selectedEvalModels.size}\n\n`;
+
+            const modelFiles = Array.from(selectedEvalModels);
+            const results = [];
+
+            // Run evaluations sequentially
+            for (let i = 0; i < modelFiles.length; i++) {
+                const modelFile = modelFiles[i];
+                const progress = ((i) / modelFiles.length) * 100;
+                progressFill.style.width = `${progress}%`;
+
+                progressText.textContent += `[${i+1}/${modelFiles.length}] Evaluating ${modelFile}...\n`;
+
+                try {
+                    const response = await fetch('http://localhost:5001/run_evaluation', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model_file: modelFile,
+                            judge: judge
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    progressText.textContent += `  ✓ Complete: ${result.evaluation_name}\n`;
+                    progressText.textContent += `  Examples: ${result.examples_evaluated}\n\n`;
+
+                    results.push({
+                        name: result.evaluation_name,
+                        url: result.weave_url,
+                        examples: result.examples_evaluated,
+                        strongExport: result.strong_export
+                    });
+
+                } catch (error) {
+                    progressText.textContent += `  ✗ Error: ${error.message}\n\n`;
+                }
+            }
+
+            // Update progress to 100%
+            progressFill.style.width = '100%';
+            progressText.textContent += `\n✓ All evaluations complete!\n`;
+
+            // Show results
+            document.getElementById('eval-results').style.display = 'block';
+            resultsDiv.innerHTML = results.map(r => `
+                <div style="margin-bottom: 10px; padding: 10px; background: #2a2a2a; border-radius: 4px;">
+                    <div style="font-weight: bold; margin-bottom: 5px;">${r.name}</div>
+                    <div style="font-size: 12px; color: #888; margin-bottom: 5px;">
+                        ${r.examples} examples • vs. ${r.strongExport ? r.strongExport.replace('.json', '') : 'unknown'}
+                    </div>
+                    <a href="${r.url}" target="_blank" style="color: #4a9eff; font-size: 12px;">View in Weave →</a>
+                </div>
+            `).join('');
+        });
+
+        // Download evaluation dataset in simple format
+        async function downloadEvalDataset(filename) {
+            try {
+                // Fetch the weak model file
+                const response = await fetch(`http://localhost:5001/get_weak_model/${filename}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch ${filename}`);
+                }
+
+                const data = await response.json();
+
+                // Extract metadata
+                const weakModel = data.metadata?.weak_model || filename.replace('weak_model_', '').replace('.json', '').replace(/_/g, '/');
+                const strongModel = data.results?.[0]?.strong_model || 'unknown';
+
+                // Transform to simple format
+                const results = data.results || [];
+                const simpleFormat = results
+                    .filter(r => r.messages && r.output) // Only include successful results
+                    .map(r => ({
+                        input: r.messages[0]?.content || '',
+                        strong_model: strongModel,
+                        strong_output: r.strong_model_output,
+                        weak_model: weakModel,
+                        weak_output: r.output
+                    }));
+
+                // Create download
+                const blob = new Blob([JSON.stringify(simpleFormat, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `eval_${filename}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                alert(`Error downloading dataset: ${error.message}`);
+                console.error('Download error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+[
+  {
+    "id": "01987be7-44cc-7f21-b46e-1fc015d0b6fa",
+    "op_name": "weave:///byyoung3/claude-opus-4-1-tutorial/op/anthropic.Messages.create:FfYDYuYEIh88SwGo5nACZ4vUT1uJXbohJN229Vab3FY",
+    "op_display_name": "anthropic.Messages.create",
+    "model": "claude-opus-4-1-20250805",
+    "time": "2025-08-05T20:23:30.764678+00:00",
+    "inputs": {
+      "self": "<anthropic.resources.messages.messages.Messages object at 0x33bfe7940>",
+      "max_tokens": 300,
+      "messages": [
+        {
+          "role": "user",
+          "content": "You are an expert Python programmer. Please write a Python function named factorial(n) that returns the factorial of n. Only provide the code for the function, without any additional explanation."
+        }
+      ],
+      "model": "claude-opus-4-1-20250805"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are an expert Python programmer. Please write a Python function named factorial(n) that returns the factorial of n. Only provide the code for the function, without any additional explanation."
+      }
+    ],
+    "output": "WeaveObject(ObjectRecord({'id': 'msg_01SBkF7kCKjP3CeErFwsYXoQ', 'content': [ObjectRecord({'citations': None, 'text': '```python\\ndef factorial(n):\\n    if n < 0:\\n        raise ValueError(\"Factorial is not defined for negative numbers\")\\n    if n == 0 or n == 1:\\n        return 1\\n    result = 1\\n    for i in range(2, n + 1):\\n        result *= i\\n    return result\\n```', 'type': 'text', '_class_name': 'TextBlock', '_bases': ['BaseModel', 'BaseModel']})], 'model': 'claude-opus-4-1-20250805', 'role': 'assistant', 'stop_reason': 'end_turn', 'stop_sequence': None, 'type': 'message', 'usage': ObjectRecord({'cache_creation_input_tokens': 0, 'cache_read_input_tokens': 0, 'input_tokens': 44, 'output_tokens': 83, 'server_tool_use': None, 'service_tier': 'standard', '_class_name': 'Usage', '_bases': ['BaseModel', 'BaseModel']}), '_class_name': 'Message', '_bases': ['BaseModel', 'BaseModel']}))",
+    "temperature": null,
+    "max_tokens": 300,
+    "usage": {
+      "input_tokens": 44,
+      "output_tokens": 83,
+      "requests": 1,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "service_tier": "standard"
+    }
+  }
+]

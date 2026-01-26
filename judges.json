@@ -1,0 +1,16 @@
+[
+  {
+    "name": "boolean_scorer",
+    "type": "llm",
+    "model": "gpt-5-2025-08-07",
+    "returnType": "boolean",
+    "prompt": "You are a strict evaluator comparing two AI responses (one from a strong reference model which is the ground truth, and one from a weaker model which we are testing to see how similar the responses it generates are to the strong model).\n\nStrong Model Response: {strong_output}\nWeak Model Response: {weak_output}\n\nDetermine if the weak model response is CORRECT compared to the strong model response.\nConsider a response CORRECT if it conveys the same key information and meaning, even if worded differently.\n\nRespond in JSON format: {'correct': true} or {'correct': false}"
+  },
+  {
+    "name": "scalar_scorer",
+    "type": "llm",
+    "model": "gpt-5-2025-08-07",
+    "returnType": "scalar",
+    "prompt": "You are a strict evaluator comparing two AI responses (one from a strong reference model which is the ground truth, and one from a weaker model which we are testing to see how similar the responses it generates are to the strong model).\n\nStrong Model Response: {strong_output}\nWeak Model Response: {weak_output}\n\nEvaluate how similar the weak model response is to the strong model response.\nRate on a scale of 1-5 where 1=completely different and 5=nearly identical. RETURN ONLY ONE SCORE REPRESENTY THE AVERAGE SIMILARITY (EG 5-(avg_error))\n\nRespond in JSON format eg {'scores': the_score }"
+  }
+]
