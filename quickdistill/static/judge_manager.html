@@ -172,7 +172,6 @@
             <label for="judge-type">Judge Type</label>
             <select id="judge-type">
                 <option value="llm">LLM-as-a-Judge</option>
-                <option value="custom">Custom Function</option>
             </select>
 
             <div id="llm-options" style="display: block;">
@@ -202,13 +201,6 @@
                     Optional placeholder: <code>{question}</code>
                 </p>
                 <textarea id="judge-prompt"></textarea>
-            </div>
-
-            <div id="custom-options" style="display: none;">
-                <label for="custom-function">Custom Function (Python)</label>
-                <textarea id="custom-function" placeholder="def custom_judge(strong_output: str, weak_output: str) -> dict:
-    # Your custom logic here
-    return {'similarity': 1.0 if strong_output == weak_output else 0.0}"></textarea>
             </div>
 
             <button onclick="saveJudge()" id="save-btn">Save Judge</button>
@@ -340,8 +332,6 @@ Respond in JSON format: {'correct': true} or {'correct': false}`
                     alert('Error: Judge prompt must include {weak_output} placeholder');
                     return;
                 }
-            } else {
-                judge.customFunction = document.getElementById('custom-function').value.trim();
             }
 
             const success = await saveJudgeToServer(judge);
@@ -358,7 +348,6 @@ Respond in JSON format: {'correct': true} or {'correct': false}`
             document.getElementById('judge-type').value = 'llm';
             document.getElementById('judge-model').value = 'gpt-5-2025-08-07';
             document.getElementById('judge-prompt').value = '';
-            document.getElementById('custom-function').value = '';
             document.getElementById('form-title').textContent = 'Create New Judge';
             document.getElementById('save-btn').textContent = 'Save Judge';
             document.getElementById('cancel-btn').style.display = 'none';
@@ -383,8 +372,6 @@ Respond in JSON format: {'correct': true} or {'correct': false}`
                 document.getElementById('judge-model').value = judge.model;
                 document.getElementById('judge-return-type').value = judge.returnType || 'scalar';
                 document.getElementById('judge-prompt').value = judge.prompt || '';
-            } else {
-                document.getElementById('custom-function').value = judge.customFunction || '';
             }
 
             document.getElementById('form-title').textContent = 'Edit Judge';
@@ -437,9 +424,8 @@ Respond in JSON format: {'correct': true} or {'correct': false}`
 
         // Toggle judge type options
         function toggleJudgeType() {
-            const type = document.getElementById('judge-type').value;
-            document.getElementById('llm-options').style.display = type === 'llm' ? 'block' : 'none';
-            document.getElementById('custom-options').style.display = type === 'custom' ? 'block' : 'none';
+            // Only LLM type is supported now
+            document.getElementById('llm-options').style.display = 'block';
         }
 
         document.getElementById('judge-type').addEventListener('change', toggleJudgeType);

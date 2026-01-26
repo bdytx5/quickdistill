@@ -2,6 +2,8 @@ import os
 import json
 import openai
 import weave
+import shutil
+import threading
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from llmasajudge import LLMAsAJudge
@@ -19,8 +21,18 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 (DATA_DIR / 'projects').mkdir(exist_ok=True)
 (DATA_DIR / 'strong_exports').mkdir(exist_ok=True)
 
+# Copy default project if it doesn't exist
+default_project_src = PACKAGE_DIR / 'default_projects' / 'byyoung3_arena-detailed'
+default_project_dst = DATA_DIR / 'projects' / 'byyoung3_arena-detailed'
+if default_project_src.exists() and not default_project_dst.exists():
+    shutil.copytree(default_project_src, default_project_dst)
+    print(f"📦 Installed default project: byyoung3/arena-detailed")
+
 app = Flask(__name__, static_folder=str(STATIC_DIR))
 CORS(app)
+
+# Progress tracking for long-running operations
+progress_state = {}
 
 # Configuration
 PROJECT = "wandb_inference"
@@ -144,6 +156,7 @@ def run_inference_endpoint():
     models = data.get('models', [])
     strong_export_file = data.get('strong_export_file')
     num_examples = data.get('num_examples')
+    task_id = data.get('task_id', f"inference_{id(models)}")
 
     if not models:
         return jsonify({'error': 'No models provided'}), 400
@@ -168,8 +181,17 @@ def run_inference_endpoint():
 
     output_files = []
 
+    # Initialize progress tracking
+    total_steps = len(models) * len(traces)
+    progress_state[task_id] = {
+        'current': 0,
+        'total': total_steps,
+        'message': 'Starting inference...',
+        'status': 'running'
+    }
+
     # Run inference for each model
-    for model in models:
+    for model_idx, model in enumerate(models):
         print(f"Running model: {model}")
         results = []
 
@@ -177,6 +199,13 @@ def run_inference_endpoint():
         client = get_client_for_model(model)
 
         for i, trace in enumerate(traces):
+            step = model_idx * len(traces) + i + 1
+            progress_state[task_id] = {
+                'current': step,
+                'total': total_steps,
+                'message': f'[{model_idx+1}/{len(models)}] {model} - Example {i+1}/{len(traces)}',
+                'status': 'running'
+            }
             print(f"  Processing example {i+1}/{len(traces)}...", end=' ')
 
             # Extract messages
@@ -231,12 +260,29 @@ def run_inference_endpoint():
         output_files.append(str(output_file))
         print(f"Saved {len(results)} results to {output_file}")
 
+    # Mark progress as complete
+    progress_state[task_id] = {
+        'current': total_steps,
+        'total': total_steps,
+        'message': 'Complete!',
+        'status': 'complete'
+    }
+
     return jsonify({
         'status': 'success',
         'files': output_files,
         'total_examples': len(traces),
-        'models_run': len(models)
+        'models_run': len(models),
+        'task_id': task_id
     })
+
+@app.route('/progress/<task_id>', methods=['GET'])
+def get_progress(task_id):
+    """Get progress for a running task"""
+    if task_id in progress_state:
+        return jsonify(progress_state[task_id])
+    return jsonify({'error': 'Task not found'}), 404
+
 
 @app.route('/list_weak_models', methods=['GET'])
 def list_weak_models():
@@ -461,26 +507,37 @@ def run_evaluation_endpoint():
     data = request.json
     model_file = data.get('model_file')
     judge = data.get('judge')
+    task_id = data.get('task_id', f"eval_{id(data)}")
 
     if not model_file or not judge:
         return jsonify({'error': 'Missing model_file or judge'}), 400
 
     # Load weak model results
-    with open(model_file, 'r') as f:
-        data = json.load(f)
+    model_path = DATA_DIR / model_file
+    with open(model_path, 'r') as f:
+        file_data = json.load(f)
 
     # Handle both old format (list) and new format (dict with metadata)
-    if isinstance(data, dict) and 'results' in data:
-        metadata = data.get('metadata', {})
-        results = data['results']
+    if isinstance(file_data, dict) and 'results' in file_data:
+        metadata = file_data.get('metadata', {})
+        results = file_data['results']
         strong_export = metadata.get('strong_export_file', 'unknown')
     else:
         # Old format - just a list
-        results = data
+        results = file_data
         strong_export = 'unknown'
 
     # Extract model name from filename
     model_name = model_file.replace('weak_model_', '').replace('.json', '')
+
+    # Initialize progress tracking
+    total_steps = len(results)
+    progress_state[task_id] = {
+        'current': 0,
+        'total': total_steps,
+        'message': f'Starting evaluation: {model_name} with {judge["name"]}...',
+        'status': 'running'
+    }
 
     # Create evaluation logger
     ev = weave.EvaluationLogger(
@@ -489,7 +546,13 @@ def run_evaluation_endpoint():
     )
 
     # Run evaluation
-    for example in results:
+    for idx, example in enumerate(results):
+        progress_state[task_id] = {
+            'current': idx + 1,
+            'total': total_steps,
+            'message': f'{model_name} - Example {idx+1}/{total_steps}',
+            'status': 'running'
+        }
         # Skip examples with errors (null messages/output)
         if example.get('error') or not example.get('output'):
             continue
@@ -525,12 +588,21 @@ def run_evaluation_endpoint():
     # Finish evaluation
     ev.log_summary()
 
+    # Mark progress as complete
+    progress_state[task_id] = {
+        'current': total_steps,
+        'total': total_steps,
+        'message': 'Complete!',
+        'status': 'complete'
+    }
+
     return jsonify({
         'status': 'success',
         'evaluation_name': f"eval-{model_name}-{judge['name']}",
         'examples_evaluated': len(results),
         'weave_url': ev.ui_url,
-        'strong_export': strong_export
+        'strong_export': strong_export,
+        'task_id': task_id
     })
 
 

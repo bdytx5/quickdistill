@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: quickdistill
-Version: 0.1.0
+Version: 0.1.6
 Summary: Fast and easy toolkit for distilling AI models
 Author-email: Brett Young <bdytx5@umsystem.edu>
 License: MIT
@@ -21,12 +21,11 @@ Classifier: Programming Language :: Python :: 3.11
 Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
 Requires-Python: >=3.8
 Description-Content-Type: text/markdown
-Requires-Dist: flask>=2.0.0
-Requires-Dist: flask-cors>=3.0.0
-Requires-Dist: openai>=1.0.0
-Requires-Dist: weave>=0.50.0
-Requires-Dist: llmasajudge>=0.1.0
-Requires-Dist: datasets>=2.0.0
+Requires-Dist: flask==2.3.2
+Requires-Dist: flask-cors==4.0.0
+Requires-Dist: openai==2.14.0
+Requires-Dist: weave==0.52.14
+Requires-Dist: llmasajudge==0.1.15
 Provides-Extra: dev
 Requires-Dist: pytest>=7.0.0; extra == "dev"
 Requires-Dist: black>=22.0.0; extra == "dev"
@@ -35,7 +34,7 @@ Requires-Dist: flake8>=4.0.0; extra == "dev"
 
 # QuickDistill
 
-**Fast and easy toolkit for distilling AI models**
+**Fast and easy toolkit for evaluating AI models (and training them in the future)**
 
 QuickDistill provides an intuitive web UI for the complete model distillation workflow:
 - 📊 View and filter Weave traces from your LLM calls
@@ -132,7 +131,7 @@ quickdistill launch --debug            # Run in debug mode
 
 ## Project Structure
 
-When you run `quickdistill launch`, it creates these directories in your current working directory:
+When you run `quickdistill launch`, it creates these directories ~/.cache/quickdistill:
 
 ```
 your-project/

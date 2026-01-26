@@ -283,7 +283,10 @@
         </div>
 
         <div class="controls">
-            <label for="op-filter">Filter by Operation:</label>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label for="op-filter">Filter by Operation:</label>
+                <span style="color: #666; font-size: 11px;">Primary supported: openai.chat.completions.create</span>
+            </div>
             <select id="op-filter">
                 <option value="all">All Operations</option>
             </select>
@@ -372,6 +375,9 @@
 
                 <div id="inference-progress" style="display: none; margin-top: 20px; padding: 15px; background: #0f0f0f; border-radius: 4px;">
                     <div style="color: #4a9eff; margin-bottom: 10px;">Running inference...</div>
+                    <div id="inference-progress-bar" style="width: 100%; height: 6px; background: #2a2a2a; border-radius: 3px; margin-bottom: 15px; overflow: hidden;">
+                        <div id="inference-progress-fill" style="height: 100%; background: #4a9eff; width: 0%; transition: width 0.3s;"></div>
+                    </div>
                     <div id="progress-text" style="color: #888; font-family: monospace; font-size: 12px; white-space: pre-wrap;"></div>
                 </div>
             </div>
@@ -576,12 +582,19 @@
             // Populate operation filter
             const ops = new Set(allTraces.map(t => t.op_display_name || 'unknown'));
             const opSelect = document.getElementById('op-filter');
-            [...ops].sort().forEach(op => {
+            const sortedOps = [...ops].sort();
+            sortedOps.forEach(op => {
                 const option = document.createElement('option');
                 option.value = op;
                 option.textContent = op;
                 opSelect.appendChild(option);
             });
+
+            // Set default to openai.chat.completions.create if it exists
+            if (sortedOps.includes('openai.chat.completions.create')) {
+                opSelect.value = 'openai.chat.completions.create';
+                currentOpFilter = 'openai.chat.completions.create';
+            }
 
             // Populate model filter
             const models = new Set(allTraces.map(t => t.model));
@@ -909,20 +922,46 @@
             // Show progress
             document.getElementById('inference-progress').style.display = 'block';
             const progressText = document.getElementById('progress-text');
+            const progressFill = document.getElementById('inference-progress-fill');
             progressText.textContent = `Starting inference...\n`;
-            progressText.textContent += `Strong Export: ${strongExportFile}\n`;
-            progressText.textContent += `Models: ${allModels.join(', ')}\n`;
-            progressText.textContent += `Max Examples: ${numExamples}\n\n`;
+            progressFill.style.width = '0%';
+
+            // Start inference and poll for progress
+            let taskId = null;
+            let pollInterval = null;
+
+            const pollProgress = async () => {
+                if (!taskId) return;
+                try {
+                    const resp = await fetch(`/progress/${taskId}`);
+                    if (resp.ok) {
+                        const progress = await resp.json();
+                        const percent = (progress.current / progress.total) * 100;
+                        progressFill.style.width = `${percent}%`;
+                        progressText.textContent = `${progress.message}\nProgress: ${progress.current}/${progress.total} (${percent.toFixed(1)}%)\n`;
+                    }
+                } catch (e) {
+                    console.error('Error polling progress:', e);
+                }
+            };
 
             // Call backend API
             try {
+                // Generate a task ID for polling
+                taskId = `inference_${Date.now()}`;
+
+                // Start polling immediately
+                pollInterval = setInterval(pollProgress, 300);
+
+                // Start the inference
                 const response = await fetch('/run_inference', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         models: allModels,
                         strong_export_file: strongExportFile,
-                        num_examples: numExamples
+                        num_examples: numExamples,
+                        task_id: taskId
                     })
                 });
 
@@ -931,8 +970,12 @@
                 }
 
                 const result = await response.json();
-                progressText.textContent += `\n✓ Complete!\n`;
-                progressText.textContent += `Results saved to: ${result.files.join(', ')}\n`;
+
+                // Stop polling
+                if (pollInterval) clearInterval(pollInterval);
+
+                progressText.textContent = `\n✓ Complete!\nResults saved to: ${result.files.join(', ')}\n`;
+                progressFill.style.width = '100%';
 
                 setTimeout(() => {
                     document.getElementById('inference-panel').style.display = 'none';
@@ -941,8 +984,7 @@
 
             } catch (error) {
                 progressText.textContent += `\n✗ Error: ${error.message}\n`;
-                progressText.textContent += `\nNote: You need to run the backend server for inference.\n`;
-                progressText.textContent += `Run: python inference_server.py\n`;
+                if (pollInterval) clearInterval(pollInterval);
             }
         });
 
@@ -1081,21 +1123,44 @@
             const modelFiles = Array.from(selectedEvalModels);
             const results = [];
 
-            // Run evaluations sequentially
+            // Run evaluations sequentially with granular progress
             for (let i = 0; i < modelFiles.length; i++) {
                 const modelFile = modelFiles[i];
-                const progress = ((i) / modelFiles.length) * 100;
-                progressFill.style.width = `${progress}%`;
 
-                progressText.textContent += `[${i+1}/${modelFiles.length}] Evaluating ${modelFile}...\n`;
+                progressText.textContent += `[${i+1}/${modelFiles.length}] Starting ${modelFile}...\n`;
+
+                let pollInterval = null;
+                let taskId = null;
+
+                const pollProgress = async () => {
+                    if (!taskId) return;
+                    try {
+                        const resp = await fetch(`/progress/${taskId}`);
+                        if (resp.ok) {
+                            const progress = await resp.json();
+                            const percent = (progress.current / progress.total) * 100;
+                            progressFill.style.width = `${percent}%`;
+                            progressText.textContent = `[${i+1}/${modelFiles.length}] ${progress.message}\nProgress: ${progress.current}/${progress.total} (${percent.toFixed(1)}%)\n`;
+                        }
+                    } catch (e) {
+                        console.error('Error polling eval progress:', e);
+                    }
+                };
 
                 try {
+                    // Generate task ID for this evaluation
+                    taskId = `eval_${Date.now()}_${i}`;
+
+                    // Start polling
+                    pollInterval = setInterval(pollProgress, 300);
+
                     const response = await fetch('/run_evaluation', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             model_file: modelFile,
-                            judge: judge
+                            judge: judge,
+                            task_id: taskId
                         })
                     });
 
@@ -1104,6 +1169,10 @@
                     }
 
                     const result = await response.json();
+
+                    // Clear polling when done
+                    if (pollInterval) clearInterval(pollInterval);
+
                     progressText.textContent += `  ✓ Complete: ${result.evaluation_name}\n`;
                     progressText.textContent += `  Examples: ${result.examples_evaluated}\n\n`;
 
@@ -1115,6 +1184,7 @@
                     });
 
                 } catch (error) {
+                    if (pollInterval) clearInterval(pollInterval);
                     progressText.textContent += `  ✗ Error: ${error.message}\n\n`;
                 }
             }

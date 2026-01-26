@@ -8,7 +8,7 @@ This package provides tools to:
 - Export datasets for model evaluation
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.6"
 __author__ = "Brett Young"
 __email__ = "bdytx5@umsystem.edu"
 
