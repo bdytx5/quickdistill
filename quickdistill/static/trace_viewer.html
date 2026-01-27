@@ -300,21 +300,45 @@
                 Select All Filtered
             </button>
 
-            <button id="export-btn" style="padding: 8px 16px; background: #4a9eff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                Export Selected to Test Set (<span id="selected-count">0</span>)
-            </button>
+            <!-- Manual Workflow Section -->
+            <div style="margin: 20px 0; padding: 15px; background: #1a2a1a; border-radius: 8px; border: 3px solid #ffffff;">
+                <div style="color: #ffffff; font-size: 14px; font-weight: 500; margin-bottom: 12px;">📋 Manual Workflow (Step-by-Step):</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <button id="export-btn" style="padding: 8px 16px; background: #4a9eff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Export Selected to Test Set (<span id="selected-count">0</span>)
+                    </button>
 
-            <button id="open-inference-btn" style="padding: 8px 16px; background: #7c4a9e; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                Run Weak Models
-            </button>
+                    <button id="open-inference-btn" style="padding: 8px 16px; background: #7c4a9e; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Run Weak Models
+                    </button>
 
-            <button id="open-eval-btn" style="padding: 8px 16px; background: #9e6a4a; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                Run Evaluation
-            </button>
+                    <button id="open-eval-btn" style="padding: 8px 16px; background: #9e6a4a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Run Evaluation
+                    </button>
+                </div>
+            </div>
 
+            <!-- Utilities -->
             <a href="/judge" target="_blank" style="padding: 8px 16px; background: #4a5a9e; color: white; border: none; border-radius: 4px; text-decoration: none; display: inline-block;">
                 Manage Judges
             </a>
+
+            <button id="open-test-judge-btn" style="padding: 8px 16px; background: #6a4a7e; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Test Judges
+            </button>
+
+            <button id="open-settings-btn" style="padding: 8px 16px; background: #5a5a5a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Settings
+            </button>
+
+            <!-- Automatic Workflow Section -->
+            <div style="margin: 20px 0; padding: 15px; background: #2a1a2a; border-radius: 8px; border: 1px solid #4a2a4a;">
+                <div style="color: #aaa; font-size: 13px; margin-bottom: 10px;">Automatic Workflow:</div>
+                <button id="open-e2e-btn" style="padding: 10px 20px; background: #7a4a9e; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">
+                    ⚡ Run End-to-End Test
+                </button>
+                <div style="color: #666; font-size: 11px; margin-top: 8px;">Export → Generate → Evaluate (all in one)</div>
+            </div>
 
             <div class="stats">
                 <div>Total: <span id="total-count">0</span></div>
@@ -424,6 +448,193 @@
                         <div style="color: #4a9eff; margin-bottom: 10px; font-weight: bold;">Completed Evaluations:</div>
                         <div id="eval-results-links" style="color: #ccc;"></div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div id="settings-panel" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; padding: 40px;">
+            <div style="max-width: 600px; margin: 0 auto; background: #1a1a1a; border-radius: 8px; padding: 30px; border: 1px solid #2a2a2a;">
+                <h2 style="color: #fff; margin-bottom: 20px;">Settings</h2>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #aaa; margin-bottom: 8px; font-size: 14px;">W&B Inference Project</label>
+                    <input type="text" id="settings-inference-project" placeholder="e.g., wandb_fc/quickstart_playground"
+                        style="width: 100%; padding: 10px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px; font-size: 14px;">
+                    <div style="color: #666; font-size: 12px; margin-top: 5px;">Used for running weak model inference</div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <label style="display: block; color: #aaa; margin-bottom: 8px; font-size: 14px;">W&B Evaluation Project</label>
+                    <input type="text" id="settings-evaluation-project" placeholder="e.g., wandb_inference"
+                        style="width: 100%; padding: 10px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px; font-size: 14px;">
+                    <div style="color: #666; font-size: 12px; margin-top: 5px;">Used for logging evaluation results with Weave</div>
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button id="close-settings-btn" style="padding: 10px 20px; background: #5a2a2a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Cancel
+                    </button>
+                    <button id="save-settings-btn" style="padding: 10px 20px; background: #2a7c4a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Save Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Judges Panel -->
+        <div id="test-judge-panel" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; padding: 40px; overflow-y: auto;">
+            <div style="max-width: 1000px; margin: 0 auto; background: #1a1a1a; border-radius: 8px; padding: 30px; border: 1px solid #3a2a4a;">
+                <h2 style="color: #fff; margin-bottom: 10px;">Test Judge</h2>
+                <p style="color: #888; font-size: 13px; margin-bottom: 25px;">
+                    Test your judge on sample data to see exactly what inputs/outputs it receives
+                </p>
+
+                <!-- Configuration -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                    <div>
+                        <label style="display: block; color: #aaa; margin-bottom: 8px; font-size: 14px;">Select Judge:</label>
+                        <select id="test-judge-select" style="width: 100%; padding: 10px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px; font-size: 14px;">
+                            <option value="">Loading judges...</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="display: block; color: #aaa; margin-bottom: 8px; font-size: 14px;">Weak Model Data:</label>
+                        <select id="test-weak-model-select" style="width: 100%; padding: 10px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px; font-size: 14px;">
+                            <option value="">Loading weak model files...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #aaa; margin-bottom: 8px; font-size: 14px;">Number of Samples:</label>
+                    <input type="number" id="test-num-samples" value="5" min="1" max="50"
+                        style="width: 150px; padding: 10px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px; font-size: 14px;">
+                    <span style="color: #666; font-size: 12px; margin-left: 10px;">Max: 50</span>
+                </div>
+
+                <!-- Judge Model -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #aaa; margin-bottom: 8px; font-size: 14px;">Judge Model:</label>
+                    <input type="text" id="test-judge-model"
+                        style="width: 100%; padding: 10px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px; font-size: 14px;"
+                        placeholder="e.g., gpt-4o, claude-3-5-sonnet-20241022">
+                    <div style="color: #666; font-size: 12px; margin-top: 5px;">
+                        Override the judge's model for this test
+                    </div>
+                </div>
+
+                <!-- Judge Prompt -->
+                <div style="margin-bottom: 30px;">
+                    <label style="display: block; color: #aaa; margin-bottom: 8px; font-size: 14px;">Judge Prompt:</label>
+                    <textarea id="test-judge-prompt"
+                        style="width: 100%; min-height: 200px; padding: 10px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px; font-size: 13px; font-family: 'Courier New', monospace; resize: vertical;"
+                        placeholder="Select a judge to load its prompt..."></textarea>
+                    <div style="color: #666; font-size: 12px; margin-top: 5px;">
+                        Edit the prompt and test changes, or save to update the judge permanently
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div style="display: flex; gap: 10px; margin-bottom: 30px;">
+                    <button id="run-test-judge-btn" style="padding: 10px 20px; background: #6a4a7e; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">
+                        Run Test
+                    </button>
+                    <button id="save-test-judge-prompt-btn" style="padding: 10px 20px; background: #2a7c4a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Save Prompt to Judge
+                    </button>
+                    <button id="close-test-judge-btn" style="padding: 10px 20px; background: #5a2a2a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Close
+                    </button>
+                </div>
+
+                <!-- Results -->
+                <div id="test-judge-results" style="display: none;">
+                    <h3 style="color: #4a9eff; margin-bottom: 15px;">Test Results</h3>
+                    <div id="test-judge-results-content" style="max-height: 600px; overflow-y: auto;">
+                        <!-- Results populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- End-to-End Test Panel -->
+        <div id="e2e-panel" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; padding: 40px; overflow-y: auto;">
+            <div style="max-width: 800px; margin: 0 auto; background: #1a1a1a; border-radius: 8px; padding: 30px; border: 1px solid #4a2a4a;">
+                <h2 style="color: #fff; margin-bottom: 10px;">⚡ Run End-to-End Test</h2>
+                <p style="color: #888; font-size: 13px; margin-bottom: 25px;">
+                    This will automatically: Export selected traces → Run weak models → Evaluate with judge
+                </p>
+
+                <!-- Weak Model Selection -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="color: #fff; font-size: 16px; margin-bottom: 15px;">1. Select Weak Models</h3>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; color: #aaa; margin-bottom: 8px; font-size: 13px;">W&B Models:</label>
+                        <div id="e2e-wandb-models" style="max-height: 150px; overflow-y: auto; background: #0f0f0f; padding: 10px; border-radius: 4px; border: 1px solid #2a2a2a;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; color: #aaa; margin-bottom: 8px; font-size: 13px;">OpenRouter Models (optional):</label>
+                        <textarea id="e2e-openrouter-models" placeholder="Enter OpenRouter models (one per line)&#10;e.g.,&#10;meta-llama/llama-3.3-70b-instruct&#10;anthropic/claude-3.5-sonnet"
+                            style="width: 100%; padding: 8px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px; font-size: 13px; min-height: 80px; font-family: monospace;"></textarea>
+                        <div style="color: #666; font-size: 11px; margin-top: 5px;">One model per line</div>
+                    </div>
+
+                    <div>
+                        <label style="display: block; color: #aaa; margin-bottom: 8px; font-size: 13px;">Max Examples (optional):</label>
+                        <input type="number" id="e2e-num-examples" placeholder="Leave empty to use all selected traces"
+                            style="width: 200px; padding: 8px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px; font-size: 13px;">
+                    </div>
+                </div>
+
+                <!-- Judge Selection -->
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #fff; font-size: 16px; margin-bottom: 15px;">2. Select Judge</h3>
+                    <select id="e2e-judge" style="width: 100%; padding: 10px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px; font-size: 14px;">
+                        <option value="">Loading judges...</option>
+                    </select>
+                </div>
+
+                <!-- Actions -->
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button id="close-e2e-btn" style="padding: 10px 20px; background: #5a2a2a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Cancel
+                    </button>
+                    <button id="run-e2e-btn" style="padding: 10px 20px; background: #7a4a9e; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">
+                        ⚡ Run Test
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- End-to-End Progress Panel -->
+        <div id="e2e-progress-panel" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1100; padding: 40px; overflow-y: auto;">
+            <div style="max-width: 800px; margin: 0 auto; background: #1a1a1a; border-radius: 8px; padding: 30px; border: 1px solid #4a2a4a;">
+                <h2 style="color: #fff; margin-bottom: 20px;">Running End-to-End Test</h2>
+
+                <!-- Overall Progress -->
+                <div style="margin-bottom: 30px;">
+                    <div style="color: #4a9eff; font-size: 14px; margin-bottom: 10px;" id="e2e-step-label">Step 1/3: Exporting traces...</div>
+                    <div style="width: 100%; height: 8px; background: #2a2a2a; border-radius: 4px; overflow: hidden;">
+                        <div id="e2e-overall-progress" style="height: 100%; background: #7a4a9e; width: 0%; transition: width 0.3s;"></div>
+                    </div>
+                </div>
+
+                <!-- Detailed Progress -->
+                <div id="e2e-progress-text" style="color: #888; font-family: monospace; font-size: 12px; white-space: pre-wrap; background: #0f0f0f; padding: 15px; border-radius: 4px; max-height: 400px; overflow-y: auto;"></div>
+
+                <!-- Results -->
+                <div id="e2e-results" style="display: none; margin-top: 20px;">
+                    <h3 style="color: #4a9eff; margin-bottom: 15px;">✓ Test Complete!</h3>
+                    <div id="e2e-results-content" style="background: #0f0f0f; padding: 15px; border-radius: 4px;"></div>
+                    <button id="close-e2e-progress-btn" style="margin-top: 20px; padding: 10px 20px; background: #2a7c4a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Close
+                    </button>
                 </div>
             </div>
         </div>
@@ -1287,6 +1498,517 @@
                 console.error('Delete error:', error);
             }
         }
+
+        // === SETTINGS ===
+
+        // Load and display settings
+        async function loadSettings() {
+            try {
+                const response = await fetch('/settings');
+                const settings = await response.json();
+                document.getElementById('settings-inference-project').value = settings.inference_project || '';
+                document.getElementById('settings-evaluation-project').value = settings.evaluation_project || '';
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        // Open settings panel
+        document.getElementById('open-settings-btn').addEventListener('click', async () => {
+            await loadSettings();
+            document.getElementById('settings-panel').style.display = 'block';
+        });
+
+        // Close settings panel
+        document.getElementById('close-settings-btn').addEventListener('click', () => {
+            document.getElementById('settings-panel').style.display = 'none';
+        });
+
+        // Save settings
+        document.getElementById('save-settings-btn').addEventListener('click', async () => {
+            const settings = {
+                inference_project: document.getElementById('settings-inference-project').value.trim(),
+                evaluation_project: document.getElementById('settings-evaluation-project').value.trim()
+            };
+
+            if (!settings.inference_project || !settings.evaluation_project) {
+                alert('Both project fields are required');
+                return;
+            }
+
+            try {
+                const response = await fetch('/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(settings)
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('Settings saved! Please restart the server for changes to take effect.');
+                    document.getElementById('settings-panel').style.display = 'none';
+                } else {
+                    alert('Error saving settings');
+                }
+            } catch (error) {
+                alert('Error saving settings: ' + error.message);
+            }
+        });
+
+        // === TEST JUDGES ===
+
+        let testJudgesData = []; // Store judges globally for test panel
+
+        // Open test judge panel
+        document.getElementById('open-test-judge-btn').addEventListener('click', async () => {
+            // Load judges
+            try {
+                const response = await fetch('/list_judges');
+                const data = await response.json();
+                testJudgesData = data.judges || []; // Store globally
+                const judgeSelect = document.getElementById('test-judge-select');
+
+                if (testJudgesData.length > 0) {
+                    judgeSelect.innerHTML = testJudgesData.map((judge, idx) =>
+                        `<option value="${idx}">${judge.name} (${judge.type})</option>`
+                    ).join('');
+
+                    // Load first judge's prompt and model
+                    if (testJudgesData[0]) {
+                        document.getElementById('test-judge-prompt').value = testJudgesData[0].prompt || '';
+                        document.getElementById('test-judge-model').value = testJudgesData[0].model || '';
+                    }
+                } else {
+                    judgeSelect.innerHTML = '<option value="">No judges available</option>';
+                }
+            } catch (error) {
+                console.error('Error loading judges:', error);
+            }
+
+            // Load weak model files
+            try {
+                const response = await fetch('/list_weak_models');
+                const data = await response.json();
+                const weakModelSelect = document.getElementById('test-weak-model-select');
+
+                if (data.files && data.files.length > 0) {
+                    weakModelSelect.innerHTML = data.files.map(f =>
+                        `<option value="${f.filename}">${f.weak_model || f.filename}</option>`
+                    ).join('');
+                } else {
+                    weakModelSelect.innerHTML = '<option value="">No weak model files available</option>';
+                }
+            } catch (error) {
+                console.error('Error loading weak models:', error);
+            }
+
+            document.getElementById('test-judge-panel').style.display = 'block';
+            document.getElementById('test-judge-results').style.display = 'none';
+        });
+
+        // When judge selection changes, update the prompt and model
+        document.getElementById('test-judge-select').addEventListener('change', (e) => {
+            const judgeIndex = parseInt(e.target.value);
+            if (!isNaN(judgeIndex) && testJudgesData[judgeIndex]) {
+                const judge = testJudgesData[judgeIndex];
+                document.getElementById('test-judge-prompt').value = judge.prompt || '';
+                document.getElementById('test-judge-model').value = judge.model || '';
+            }
+        });
+
+        // Close test judge panel
+        document.getElementById('close-test-judge-btn').addEventListener('click', () => {
+            document.getElementById('test-judge-panel').style.display = 'none';
+        });
+
+        // Run test judge
+        document.getElementById('run-test-judge-btn').addEventListener('click', async () => {
+            const judgeIndex = document.getElementById('test-judge-select').value;
+            const weakModelFile = document.getElementById('test-weak-model-select').value;
+            const numSamples = parseInt(document.getElementById('test-num-samples').value) || 5;
+            const editedPrompt = document.getElementById('test-judge-prompt').value;
+            const editedModel = document.getElementById('test-judge-model').value;
+
+            if (!judgeIndex) {
+                alert('Please select a judge');
+                return;
+            }
+
+            if (!weakModelFile) {
+                alert('Please select a weak model file');
+                return;
+            }
+
+            if (!editedPrompt.trim()) {
+                alert('Please enter a judge prompt');
+                return;
+            }
+
+            if (!editedModel.trim()) {
+                alert('Please enter a judge model');
+                return;
+            }
+
+            // Get judge data and override with edited prompt and model
+            const judge = { ...testJudgesData[parseInt(judgeIndex)] };
+            judge.prompt = editedPrompt; // Use the edited prompt from textarea
+            judge.model = editedModel; // Use the edited model from input
+
+            // Call test endpoint
+            try {
+                const response = await fetch('/test_judge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        judge: judge,
+                        weak_model_file: weakModelFile,
+                        num_samples: numSamples
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to test judge');
+                }
+
+                const result = await response.json();
+
+                // Display results
+                const resultsDiv = document.getElementById('test-judge-results-content');
+                resultsDiv.innerHTML = result.samples.map((sample, idx) => `
+                    <div style="margin-bottom: 20px; padding: 20px; background: #0f0f0f; border-radius: 8px; border: 1px solid #2a2a2a;">
+                        <h4 style="color: #4a9eff; margin-bottom: 15px;">Sample ${idx + 1} of ${result.samples.length}</h4>
+
+                        <div style="margin-bottom: 15px;">
+                            <div style="color: #888; font-size: 12px; margin-bottom: 5px;">Question:</div>
+                            <div style="color: #ccc; font-size: 13px; background: #1a1a1a; padding: 10px; border-radius: 4px; max-height: 100px; overflow-y: auto;">${sample.question || 'N/A'}</div>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <div style="color: #888; font-size: 12px; margin-bottom: 5px;">Strong Model Output:</div>
+                            <div style="color: #ccc; font-size: 13px; background: #1a1a1a; padding: 10px; border-radius: 4px; max-height: 100px; overflow-y: auto;">${sample.strong_output || 'N/A'}</div>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <div style="color: #888; font-size: 12px; margin-bottom: 5px;">Weak Model Output:</div>
+                            <div style="color: #ccc; font-size: 13px; background: #1a1a1a; padding: 10px; border-radius: 4px; max-height: 100px; overflow-y: auto;">${sample.weak_output || 'N/A'}</div>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <div style="color: #888; font-size: 12px; margin-bottom: 5px;">Judge Prompt (filled):</div>
+                            <pre style="color: #aaa; font-size: 11px; background: #1a1a1a; padding: 10px; border-radius: 4px; max-height: 150px; overflow-y: auto; white-space: pre-wrap; font-family: monospace;">${sample.judge_prompt}</pre>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <div style="color: #888; font-size: 12px; margin-bottom: 5px;">Raw Judge Response:</div>
+                            <pre style="color: #f4d03f; font-size: 11px; background: #1a1a1a; padding: 10px; border-radius: 4px; max-height: 150px; overflow-y: auto; white-space: pre-wrap; font-family: monospace;">${sample.raw_response}</pre>
+                        </div>
+
+                        <div>
+                            <div style="color: #888; font-size: 12px; margin-bottom: 5px;">Parsed Scores:</div>
+                            <div style="color: #4a9eff; font-size: 13px; background: #1a1a1a; padding: 10px; border-radius: 4px; font-family: monospace;">${JSON.stringify(sample.parsed_scores, null, 2)}</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('test-judge-results').style.display = 'block';
+
+            } catch (error) {
+                alert('Error testing judge: ' + error.message);
+                console.error('Test error:', error);
+            }
+        });
+
+        // Save prompt to judge
+        document.getElementById('save-test-judge-prompt-btn').addEventListener('click', async () => {
+            const judgeIndex = document.getElementById('test-judge-select').value;
+            const editedPrompt = document.getElementById('test-judge-prompt').value;
+
+            if (!judgeIndex) {
+                alert('Please select a judge');
+                return;
+            }
+
+            if (!editedPrompt.trim()) {
+                alert('Please enter a judge prompt');
+                return;
+            }
+
+            // Get judge data and update prompt
+            const judge = { ...testJudgesData[parseInt(judgeIndex)] };
+            judge.prompt = editedPrompt;
+
+            // Confirm with user
+            if (!confirm(`Save this prompt to judge "${judge.name}"? This will permanently update the judge.`)) {
+                return;
+            }
+
+            // Call save endpoint
+            try {
+                const response = await fetch('/save_judge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ judge: judge })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to save judge');
+                }
+
+                const result = await response.json();
+
+                // Update local judges data
+                testJudgesData = result.judges || [];
+
+                alert('Judge prompt saved successfully!');
+            } catch (error) {
+                alert('Error saving judge: ' + error.message);
+                console.error('Save error:', error);
+            }
+        });
+
+        // === END-TO-END TEST ===
+
+        // Open E2E panel
+        document.getElementById('open-e2e-btn').addEventListener('click', async () => {
+            if (selectedTraces.size === 0) {
+                alert('Please select at least one trace first!');
+                return;
+            }
+
+            // Populate W&B models
+            const wandbModelsDiv = document.getElementById('e2e-wandb-models');
+            wandbModelsDiv.innerHTML = AVAILABLE_MODELS.map(model => `
+                <label style="display: block; padding: 5px 0; color: #ccc; cursor: pointer;">
+                    <input type="checkbox" class="e2e-model-checkbox" value="${model}" style="margin-right: 8px;">
+                    ${model}
+                </label>
+            `).join('');
+
+            // Load judges
+            try {
+                const response = await fetch('/list_judges');
+                const data = await response.json();
+                const judgeSelect = document.getElementById('e2e-judge');
+
+                if (data.judges && data.judges.length > 0) {
+                    judgeSelect.innerHTML = data.judges.map((judge, idx) =>
+                        `<option value="${idx}">${judge.name} (${judge.type})</option>`
+                    ).join('');
+                } else {
+                    judgeSelect.innerHTML = '<option value="">No judges available - create one first</option>';
+                }
+            } catch (error) {
+                console.error('Error loading judges:', error);
+            }
+
+            document.getElementById('e2e-panel').style.display = 'block';
+        });
+
+        // Close E2E panel
+        document.getElementById('close-e2e-btn').addEventListener('click', () => {
+            document.getElementById('e2e-panel').style.display = 'none';
+        });
+
+        // Close E2E progress
+        document.getElementById('close-e2e-progress-btn').addEventListener('click', () => {
+            document.getElementById('e2e-progress-panel').style.display = 'none';
+            document.getElementById('e2e-results').style.display = 'none';
+        });
+
+        // Run end-to-end test
+        document.getElementById('run-e2e-btn').addEventListener('click', async () => {
+            // Gather selected models
+            const selectedWanbModels = Array.from(document.querySelectorAll('.e2e-model-checkbox:checked')).map(cb => cb.value);
+            const openRouterModelsText = document.getElementById('e2e-openrouter-models').value.trim();
+            const openRouterModels = openRouterModelsText
+                .split('\n')
+                .map(m => m.trim())
+                .filter(m => m.length > 0);
+            const allModels = [...selectedWanbModels, ...openRouterModels];
+
+            if (allModels.length === 0) {
+                alert('Please select at least one model!');
+                return;
+            }
+
+            const judgeIndex = document.getElementById('e2e-judge').value;
+            if (!judgeIndex) {
+                alert('Please select a judge!');
+                return;
+            }
+
+            const numExamples = document.getElementById('e2e-num-examples').value ? parseInt(document.getElementById('e2e-num-examples').value) : null;
+
+            // Load judge data
+            const judgesResponse = await fetch('/list_judges');
+            const judgesData = await judgesResponse.json();
+            const judge = judgesData.judges[parseInt(judgeIndex)];
+
+            // Hide config panel, show progress panel
+            document.getElementById('e2e-panel').style.display = 'none';
+            document.getElementById('e2e-progress-panel').style.display = 'block';
+
+            const progressText = document.getElementById('e2e-progress-text');
+            const stepLabel = document.getElementById('e2e-step-label');
+            const overallProgress = document.getElementById('e2e-overall-progress');
+
+            progressText.textContent = '';
+
+            try {
+                // === STEP 1: Export Selected Traces ===
+                stepLabel.textContent = 'Step 1/3: Exporting selected traces...';
+                overallProgress.style.width = '10%';
+                progressText.textContent += '📦 Exporting selected traces...\n';
+
+                // Get full trace objects for selected IDs
+                const selectedTraceObjects = allTraces.filter(t => selectedTraces.has(t.id));
+
+                const exportResponse = await fetch('/export_strong_traces', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        traces: selectedTraceObjects,
+                        nickname: `e2e_export_${Date.now()}`
+                    })
+                });
+
+                if (!exportResponse.ok) {
+                    throw new Error('Failed to export traces');
+                }
+
+                const exportResult = await exportResponse.json();
+                const exportFilename = exportResult.filename;
+                progressText.textContent += `✓ Exported ${exportResult.count} traces to ${exportFilename}\n\n`;
+                overallProgress.style.width = '20%';
+
+                // === STEP 2: Run Weak Model Inference ===
+                stepLabel.textContent = 'Step 2/3: Running weak model inference...';
+                progressText.textContent += `⚙️  Running inference with ${allModels.length} model(s)...\n`;
+
+                const taskId = `inference_${Date.now()}`;
+                let pollInterval = null;
+
+                const pollProgress = async () => {
+                    try {
+                        const resp = await fetch(`/progress/${taskId}`);
+                        if (resp.ok) {
+                            const progress = await resp.json();
+                            const percent = (progress.current / progress.total) * 100;
+                            // Map inference progress to 20-60% of overall
+                            const overallPercent = 20 + (percent * 0.4);
+                            overallProgress.style.width = `${overallPercent}%`;
+                        }
+                    } catch (e) {
+                        console.error('Error polling progress:', e);
+                    }
+                };
+
+                pollInterval = setInterval(pollProgress, 300);
+
+                const inferenceResponse = await fetch('/run_inference', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        models: allModels,
+                        strong_export_file: exportFilename,
+                        num_examples: numExamples,
+                        task_id: taskId
+                    })
+                });
+
+                if (pollInterval) clearInterval(pollInterval);
+
+                if (!inferenceResponse.ok) {
+                    throw new Error('Failed to run inference');
+                }
+
+                const inferenceResult = await inferenceResponse.json();
+                progressText.textContent += `✓ Generated outputs for ${allModels.length} model(s)\n\n`;
+                overallProgress.style.width = '60%';
+
+                // === STEP 3: Run Evaluations ===
+                stepLabel.textContent = 'Step 3/3: Running evaluations...';
+                progressText.textContent += `📊 Running evaluations with judge: ${judge.name}...\n`;
+
+                const evaluationResults = [];
+
+                // Get list of weak model files that were just generated
+                const weakModelsResponse = await fetch('/list_weak_models');
+                const weakModelsData = await weakModelsResponse.json();
+
+                // Filter to only the models we just ran
+                const weakModelFiles = weakModelsData.files
+                    .filter(f => allModels.some(m => f.filename.includes(m.replace('/', '_'))))
+                    .map(f => f.filename);
+
+                for (let i = 0; i < weakModelFiles.length; i++) {
+                    const modelFile = weakModelFiles[i];
+                    const evalTaskId = `eval_${Date.now()}_${i}`;
+
+                    progressText.textContent += `\n[${i+1}/${weakModelFiles.length}] Evaluating ${modelFile}...\n`;
+
+                    let evalPollInterval = null;
+                    const pollEvalProgress = async () => {
+                        try {
+                            const resp = await fetch(`/progress/${evalTaskId}`);
+                            if (resp.ok) {
+                                const progress = await resp.json();
+                                const percent = (progress.current / progress.total) * 100;
+                                // Map eval progress to 60-100% of overall
+                                const basePercent = 60 + (i / weakModelFiles.length) * 40;
+                                const stepPercent = (percent / 100) * (40 / weakModelFiles.length);
+                                overallProgress.style.width = `${basePercent + stepPercent}%`;
+                            }
+                        } catch (e) {
+                            console.error('Error polling eval progress:', e);
+                        }
+                    };
+
+                    evalPollInterval = setInterval(pollEvalProgress, 300);
+
+                    const evalResponse = await fetch('/run_evaluation', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model_file: modelFile,
+                            judge: judge,
+                            task_id: evalTaskId
+                        })
+                    });
+
+                    if (evalPollInterval) clearInterval(evalPollInterval);
+
+                    if (evalResponse.ok) {
+                        const evalResult = await evalResponse.json();
+                        progressText.textContent += `  ✓ Complete: ${evalResult.examples_evaluated} examples evaluated\n`;
+                        evaluationResults.push(evalResult);
+                    } else {
+                        progressText.textContent += `  ✗ Error evaluating ${modelFile}\n`;
+                    }
+                }
+
+                overallProgress.style.width = '100%';
+                stepLabel.textContent = 'Complete!';
+                progressText.textContent += `\n✅ All evaluations complete!\n`;
+
+                // Show results
+                document.getElementById('e2e-results').style.display = 'block';
+                const resultsContent = document.getElementById('e2e-results-content');
+                resultsContent.innerHTML = evaluationResults.map(r => `
+                    <div style="margin-bottom: 15px; padding: 15px; background: #1a1a1a; border-radius: 4px; border: 1px solid #2a2a2a;">
+                        <div style="font-weight: bold; color: #fff; margin-bottom: 8px;">${r.evaluation_name}</div>
+                        <div style="font-size: 12px; color: #888; margin-bottom: 8px;">
+                            ${r.examples_evaluated} examples evaluated
+                        </div>
+                        <a href="${r.weave_url}" target="_blank" style="color: #4a9eff; font-size: 13px;">View in Weave →</a>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                progressText.textContent += `\n\n❌ Error: ${error.message}\n`;
+                stepLabel.textContent = 'Error occurred';
+            }
+        });
     </script>
 </body>
 </html>

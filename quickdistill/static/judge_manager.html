@@ -162,6 +162,13 @@
     <div class="container">
         <h1>Judge Manager</h1>
 
+        <!-- Prompt Generator Button -->
+        <div style="margin-bottom: 20px; display: none;">
+            <button onclick="openPromptGenerator()" style="padding: 10px 20px; background: #6a4a7e; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                ✨ Generate Judge Prompt with AI
+            </button>
+        </div>
+
         <!-- Create/Edit Judge Section -->
         <div class="section">
             <h2 id="form-title">Create New Judge</h2>
@@ -213,6 +220,73 @@
             <h2>Saved Judges</h2>
             <div class="judge-list" id="judge-list">
                 <div style="color: #666;">No judges saved yet</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prompt Generator Panel -->
+    <div id="prompt-generator-panel" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; padding: 40px; overflow-y: auto;">
+        <div style="max-width: 1200px; margin: 0 auto; background: #1a1a1a; border-radius: 8px; padding: 30px; border: 1px solid #3a2a4a;">
+            <h2 style="color: #fff; margin-bottom: 10px;">AI-Powered Judge Prompt Generator</h2>
+            <p style="color: #888; font-size: 13px; margin-bottom: 25px;">
+                Generate specialized judge prompts by showing sample data to an AI model
+            </p>
+
+            <!-- Configuration -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div>
+                    <label style="display: block; color: #aaa; margin-bottom: 8px; font-size: 14px;">Weak Model Dataset:</label>
+                    <select id="gen-weak-model-select" style="width: 100%; padding: 10px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px; font-size: 14px;">
+                        <option value="">Loading weak model files...</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; color: #aaa; margin-bottom: 8px; font-size: 14px;">Number of Samples:</label>
+                    <input type="number" id="gen-num-samples" value="3" min="1" max="10"
+                        style="width: 100%; padding: 10px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px; font-size: 14px;">
+                    <div style="color: #666; font-size: 12px; margin-top: 5px;">Max: 10 (for context limits)</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; margin-bottom: 8px; font-size: 14px;">Generation Model:</label>
+                <input type="text" id="gen-model" value="openai/gpt-5"
+                    style="width: 100%; padding: 10px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px; font-size: 14px;"
+                    placeholder="e.g., openai/gpt-5, anthropic/claude-3.5-sonnet">
+                <div style="color: #666; font-size: 12px; margin-top: 5px;">OpenRouter model to use for generating the prompt</div>
+            </div>
+
+            <!-- Meta-Prompt -->
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; color: #aaa; margin-bottom: 8px; font-size: 14px;">Meta-Prompt (edit as needed):</label>
+                <textarea id="gen-meta-prompt"
+                    style="width: 100%; min-height: 250px; padding: 10px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 4px; font-size: 13px; font-family: 'Courier New', monospace; resize: vertical;"></textarea>
+                <div style="color: #666; font-size: 12px; margin-top: 5px;">
+                    This prompt will be sent to the generation model along with sample data
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display: flex; gap: 10px; margin-bottom: 25px;">
+                <button onclick="generatePrompt()" style="padding: 10px 20px; background: #6a4a7e; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">
+                    Generate Prompt
+                </button>
+                <button onclick="closePromptGenerator()" style="padding: 10px 20px; background: #5a2a2a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Close
+                </button>
+            </div>
+
+            <!-- Generated Output -->
+            <div id="gen-output-section" style="display: none;">
+                <h3 style="color: #4a9eff; margin-bottom: 15px;">Generated Judge Prompt</h3>
+                <textarea id="gen-output" readonly
+                    style="width: 100%; min-height: 300px; padding: 15px; background: #0f0f0f; color: #4a9eff; border: 1px solid #4a9eff; border-radius: 4px; font-size: 13px; font-family: 'Courier New', monospace; resize: vertical;"></textarea>
+                <div style="margin-top: 10px;">
+                    <button onclick="copyGeneratedPrompt()" style="padding: 8px 16px; background: #2a7c4a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Copy to Clipboard
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -489,6 +563,113 @@ Respond in JSON format: {'correct': true} or {'correct': false}`
                 console.log('Not changing prompt - user has edited it');
             }
         });
+
+        // === PROMPT GENERATOR ===
+
+        const DEFAULT_META_PROMPT = `You are an expert at creating evaluation prompts for judging AI model outputs. I'm building a specialized judge prompt to evaluate the quality/similarity of weak model outputs compared to strong reference model outputs.
+
+I will show you some sample data below. Each sample contains:
+- A question/input
+- The strong reference model's output (ground truth)
+- The weak model's output (what we're evaluating)
+
+Your task: Create a specialized, detailed judge prompt that can be used to systematically evaluate the delta/difference between these outputs. The prompt should:
+1. Be specific to the patterns you see in this data
+2. Include clear evaluation criteria
+3. Be written in second-person ("You are...")
+4. Include the placeholders {question}, {strong_output}, and {weak_output}
+5. Specify the exact JSON format to return (either {'score': number} for scalar or {'correct': boolean} for boolean)
+
+Sample Data:
+{SAMPLES}
+
+Based on these samples, create a specialized judge prompt that would effectively evaluate this type of data. Return ONLY the judge prompt text, nothing else.`;
+
+        async function openPromptGenerator() {
+            // Load weak model files
+            try {
+                const response = await fetch('/list_weak_models');
+                const data = await response.json();
+                const select = document.getElementById('gen-weak-model-select');
+
+                if (data.files && data.files.length > 0) {
+                    select.innerHTML = data.files.map(f =>
+                        `<option value="${f.filename}">${f.weak_model || f.filename}</option>`
+                    ).join('');
+                } else {
+                    select.innerHTML = '<option value="">No weak model files available</option>';
+                }
+            } catch (error) {
+                console.error('Error loading weak models:', error);
+            }
+
+            // Set default meta-prompt
+            document.getElementById('gen-meta-prompt').value = DEFAULT_META_PROMPT;
+
+            // Show panel
+            document.getElementById('prompt-generator-panel').style.display = 'block';
+            document.getElementById('gen-output-section').style.display = 'none';
+        }
+
+        function closePromptGenerator() {
+            document.getElementById('prompt-generator-panel').style.display = 'none';
+        }
+
+        async function generatePrompt() {
+            const weakModelFile = document.getElementById('gen-weak-model-select').value;
+            const numSamples = parseInt(document.getElementById('gen-num-samples').value) || 3;
+            const model = document.getElementById('gen-model').value.trim();
+            const metaPrompt = document.getElementById('gen-meta-prompt').value.trim();
+
+            if (!weakModelFile) {
+                alert('Please select a weak model dataset');
+                return;
+            }
+
+            if (!model) {
+                alert('Please enter a generation model');
+                return;
+            }
+
+            if (!metaPrompt) {
+                alert('Please enter a meta-prompt');
+                return;
+            }
+
+            try {
+                const response = await fetch('/generate_judge_prompt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        weak_model_file: weakModelFile,
+                        num_samples: numSamples,
+                        model: model,
+                        meta_prompt: metaPrompt
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to generate prompt');
+                }
+
+                const result = await response.json();
+
+                // Display generated prompt
+                document.getElementById('gen-output').value = result.generated_prompt;
+                document.getElementById('gen-output-section').style.display = 'block';
+
+            } catch (error) {
+                alert('Error generating prompt: ' + error.message);
+                console.error('Generation error:', error);
+            }
+        }
+
+        function copyGeneratedPrompt() {
+            const output = document.getElementById('gen-output');
+            output.select();
+            document.execCommand('copy');
+            alert('Prompt copied to clipboard!');
+        }
     </script>
 </body>
 </html>

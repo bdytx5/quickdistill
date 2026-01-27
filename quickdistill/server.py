@@ -3,7 +3,6 @@ import json
 import openai
 import weave
 import shutil
-import threading
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from llmasajudge import LLMAsAJudge
@@ -34,8 +33,25 @@ CORS(app)
 # Progress tracking for long-running operations
 progress_state = {}
 
-# Configuration
-PROJECT = "wandb_inference"
+# Load settings
+SETTINGS_FILE = DATA_DIR / 'settings.json'
+DEFAULT_SETTINGS = {
+    'inference_project': 'wandb_fc/quickstart_playground',
+    'evaluation_project': 'wandb_inference'
+}
+
+def load_settings():
+    if SETTINGS_FILE.exists():
+        with open(SETTINGS_FILE, 'r') as f:
+            return {**DEFAULT_SETTINGS, **json.load(f)}
+    return DEFAULT_SETTINGS.copy()
+
+def save_settings(settings):
+    with open(SETTINGS_FILE, 'w') as f:
+        json.dump(settings, f, indent=2)
+
+settings = load_settings()
+PROJECT = settings['evaluation_project']
 
 weave.init(PROJECT)
 
@@ -46,7 +62,7 @@ def create_client():
         api_key=os.getenv("WANDB_API_KEY"),
         project=PROJECT,
         default_headers={
-            "OpenAI-Project": "wandb_fc/quickstart_playground"  # replace with your team/project
+            "OpenAI-Project": settings['inference_project']
         }
     )
 
@@ -175,8 +191,9 @@ def run_inference_endpoint():
     if not traces:
         return jsonify({'error': 'No traces in export file'}), 400
 
-    # Limit traces to num_examples
+    # Limit traces to num_examples (convert to int if needed)
     if num_examples:
+        num_examples = int(num_examples)
         traces = traces[:num_examples]
 
     output_files = []
@@ -282,6 +299,241 @@ def get_progress(task_id):
     if task_id in progress_state:
         return jsonify(progress_state[task_id])
     return jsonify({'error': 'Task not found'}), 404
+
+
+@app.route('/settings', methods=['GET'])
+def get_settings():
+    """Get current settings"""
+    return jsonify(settings)
+
+
+@app.route('/settings', methods=['POST'])
+def update_settings():
+    """Update settings"""
+    global settings
+    data = request.json
+    settings.update(data)
+    save_settings(settings)
+    return jsonify({'status': 'success', 'settings': settings})
+
+
+@app.route('/test_judge', methods=['POST'])
+def test_judge():
+    """Test a judge on sample data to see raw inputs/outputs"""
+    data = request.json
+    judge = data.get('judge')
+    weak_model_file = data.get('weak_model_file')
+    num_samples = data.get('num_samples', 5)
+
+    if not judge or not weak_model_file:
+        return jsonify({'error': 'Missing judge or weak_model_file'}), 400
+
+    # Load weak model results
+    model_path = DATA_DIR / weak_model_file
+    with open(model_path, 'r') as f:
+        file_data = json.load(f)
+
+    # Handle both formats
+    if isinstance(file_data, dict) and 'results' in file_data:
+        results = file_data['results']
+    else:
+        results = file_data
+
+    # Limit to num_samples
+    samples_to_test = results[:min(num_samples, len(results))]
+
+    test_results = []
+
+    for example in samples_to_test:
+        # Skip examples with errors
+        if example.get('error') or not example.get('output'):
+            continue
+
+        strong_output = example.get('strong_model_output', '')
+        weak_output = example.get('output', '')
+
+        # Extract question
+        question = ""
+        messages = example.get('messages', [])
+        if messages and len(messages) > 0:
+            question = messages[0].get('content', '')
+
+        # Build the prompt
+        prompt = judge['prompt']
+        if '{question}' in prompt:
+            prompt = prompt.replace('{question}', question or '')
+        if '{strong_output}' in prompt:
+            prompt = prompt.replace('{strong_output}', strong_output or '')
+        if '{weak_output}' in prompt:
+            prompt = prompt.replace('{weak_output}', weak_output or '')
+
+        # Run the judge and capture raw response
+        if judge['type'] == 'llm':
+            return_type = judge.get('returnType', 'scalar')
+
+            # Use a list to capture the raw response (mutable so we can access from closure)
+            captured_raw = []
+
+            def score_parser(response: str):
+                """Parse the judge response based on return type"""
+                # Capture the raw response before any processing
+                captured_raw.append(response)
+
+                response = response.strip()
+
+                # Remove markdown code blocks if present
+                if response.startswith('```'):
+                    # Remove ```json or ``` at start
+                    response = response.split('\n', 1)[1] if '\n' in response else response[3:]
+                    # Remove ``` at end
+                    if response.endswith('```'):
+                        response = response.rsplit('\n', 1)[0] if '\n' in response else response[:-3]
+                    response = response.strip()
+
+                try:
+                    # Parse JSON response
+                    parsed = json.loads(response)
+
+                    if return_type == 'boolean':
+                        # Extract boolean value - return just the bool
+                        val = parsed.get('correct', parsed.get('result', parsed.get('value', False)))
+                        return bool(val)
+                    elif return_type == 'scalar':
+                        # Extract numeric score - return just the number
+                        val = parsed.get('score', parsed.get('scores', parsed.get('value', 0)))
+                        return float(val) if isinstance(val, (int, float)) else 0
+                    else:
+                        # Unsupported return type
+                        print(f"Unsupported return type: {return_type}")
+                        return 0
+                except:
+                    print(f"Failed to parse judge response as JSON: {response}")
+                    if return_type == 'scalar':
+                        return 0
+                    elif return_type == 'boolean':
+                        return False
+                    else:
+                        return 0
+
+            # Use LLMAsAJudge exactly like the evaluation code
+            try:
+                # Initialize LLMAsAJudge with custom prompt
+                judge_instance = LLMAsAJudge(
+                    models=[judge['model']],
+                    use_fully_custom_prompt=True,
+                    output_parser=score_parser,
+                    return_type=return_type if return_type else None
+                )
+
+                # Get judgment
+                result = judge_instance.judge(prompt=prompt)
+
+                # Extract the raw response that was captured
+                raw_text = captured_raw[0] if captured_raw else "No response captured"
+
+                # Extract parsed scores from result
+                if return_type == 'scalar':
+                    score_val = result.get('scores', result.get('correct', 0))
+                    parsed_scores = {'score': score_val}
+                elif return_type == 'boolean':
+                    bool_val = result.get('correct', False)
+                    parsed_scores = {'correct': bool_val}
+                else:
+                    # Unsupported return type - default to scalar
+                    score_val = result.get('scores', result.get('correct', 0))
+                    parsed_scores = {'score': score_val}
+
+            except Exception as e:
+                raw_text = f"Error: {str(e)}"
+                parsed_scores = {'error': str(e)}
+
+            test_results.append({
+                'question': question,
+                'strong_output': strong_output,
+                'weak_output': weak_output,
+                'judge_prompt': prompt,
+                'raw_response': raw_text,
+                'parsed_scores': parsed_scores
+            })
+
+    return jsonify({
+        'status': 'success',
+        'judge_name': judge['name'],
+        'num_samples': len(test_results),
+        'samples': test_results
+    })
+
+
+@app.route('/generate_judge_prompt', methods=['POST'])
+def generate_judge_prompt():
+    """Generate a judge prompt using AI based on sample data"""
+    data = request.json
+    weak_model_file = data.get('weak_model_file')
+    num_samples = data.get('num_samples', 3)
+    model = data.get('model', 'openai/gpt-5')
+    meta_prompt = data.get('meta_prompt')
+
+    if not weak_model_file or not meta_prompt:
+        return jsonify({'error': 'Missing weak_model_file or meta_prompt'}), 400
+
+    # Load weak model results
+    model_path = DATA_DIR / weak_model_file
+    with open(model_path, 'r') as f:
+        file_data = json.load(f)
+
+    # Handle both formats
+    if isinstance(file_data, dict) and 'results' in file_data:
+        results = file_data['results']
+    else:
+        results = file_data
+
+    # Limit to num_samples
+    samples_to_use = results[:min(num_samples, len(results))]
+
+    # Format samples for meta-prompt
+    samples_text = []
+    for i, example in enumerate(samples_to_use):
+        # Skip examples with errors
+        if example.get('error') or not example.get('output'):
+            continue
+
+        strong_output = example.get('strong_model_output', '')
+        weak_output = example.get('output', '')
+
+        # Extract question
+        question = ""
+        messages = example.get('messages', [])
+        if messages and len(messages) > 0:
+            question = messages[0].get('content', '')
+
+        samples_text.append(f"""Sample {i+1}:
+Question: {question}
+Strong Model Output: {strong_output}
+Weak Model Output: {weak_output}
+---""")
+
+    samples_formatted = "\n\n".join(samples_text)
+
+    # Replace {SAMPLES} placeholder in meta-prompt
+    final_prompt = meta_prompt.replace('{SAMPLES}', samples_formatted)
+
+    # Call OpenRouter to generate the prompt
+    try:
+        client = create_openrouter_client()
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": final_prompt}]
+        )
+        generated_prompt = response.choices[0].message.content.strip()
+
+        return jsonify({
+            'status': 'success',
+            'generated_prompt': generated_prompt,
+            'num_samples_used': len(samples_text)
+        })
+
+    except Exception as e:
+        return jsonify({'error': f'Failed to generate prompt: {str(e)}'}), 500
 
 
 @app.route('/list_weak_models', methods=['GET'])
