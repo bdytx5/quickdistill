@@ -100,40 +100,133 @@ def run_inference(client, model, messages, max_tokens=1000):
         return f"ERROR: {str(e)}"
 
 def extract_output_content(output_str):
-    """Extract actual content from WeaveObject string or regular output"""
+    """Extract actual content from WeaveObject string, JSON response, or regular output.
+
+    Handles outputs from:
+    - OpenAI chat.completions.create (plain text)
+    - OpenAI responses.create (JSON with nested structure)
+    - Anthropic Messages (WeaveObject with content[0].text)
+    - Google Gemini (WeaveObject with candidates[0].content.parts[0].text)
+    """
+    import re
+    import json
+
     if not output_str:
         return None
 
-    # If it's a WeaveObject string, try to extract the text content
-    if isinstance(output_str, str) and 'WeaveObject' in output_str:
-        import re
-        # Try to find the 'text' field in the WeaveObject
-        match = re.search(r"'text':\s*'([^']*(?:\\'[^']*)*)'", output_str)
+    if not isinstance(output_str, str):
+        return str(output_str)
+
+    # Handle empty/streaming responses
+    if output_str in ('', 'None', 'null'):
+        return '[Streaming output - not captured]'
+
+    # Handle OpenAI responses.create JSON format
+    if output_str.startswith('{') and '"output"' in output_str:
+        try:
+            resp_obj = json.loads(output_str)
+            if 'output' in resp_obj and isinstance(resp_obj['output'], list):
+                # Extract text from output messages
+                text_parts = []
+                for item in resp_obj['output']:
+                    if item.get('type') == 'message' and 'content' in item:
+                        for content in item['content']:
+                            if content.get('type') == 'output_text' and 'text' in content:
+                                text_parts.append(content['text'])
+                if text_parts:
+                    return '\n\n'.join(text_parts)
+        except (json.JSONDecodeError, KeyError, TypeError):
+            pass  # Fall through to other handlers
+
+    # Handle WeaveObject strings (Anthropic, Gemini)
+    if 'WeaveObject' in output_str:
+        # Improved regex that handles escape sequences properly
+        match = re.search(r"'text':\s*'((?:[^'\\]|\\.)*)'", output_str, re.DOTALL)
         if match:
-            # Unescape the string
+            # Unescape the string properly (order matters!)
             text = match.group(1)
-            text = text.replace('\\n', '\n').replace("\\'", "'").replace('\\\\', '\\')
+            text = text.replace("\\'", "'")      # escaped single quotes
+            text = text.replace('\\"', '"')      # escaped double quotes
+            text = text.replace('\\n', '\n')     # newlines
+            text = text.replace('\\t', '\t')     # tabs
+            text = text.replace('\\r', '\r')     # carriage returns
+            text = text.replace('\\\\', '\\')    # escaped backslashes (do this last!)
             return text
 
-    # Otherwise return as-is
+        # If no text field found, return truncated version
+        return f"[Complex WeaveObject - could not extract text]\n{output_str[:500]}..."
+
+    # Plain text output (standard OpenAI chat format)
     return output_str
 
 
 def extract_messages_from_trace(trace):
-    """Extract messages from a trace in the format needed for inference"""
-    # Check if messages are at top level
+    """Extract messages from a trace in the format needed for inference.
+
+    Handles message extraction from:
+    - OpenAI chat.completions.create (messages at top level or in inputs.messages)
+    - OpenAI responses.create (inputs.input field)
+    - Anthropic Messages (inputs.messages)
+    - Google Gemini generate_content (inputs.contents array)
+    - Google Gemini Chat.send_message (inputs.message string)
+    """
+    import re
+
+    # Get op_display_name for provider detection
+    op_name = trace.get('op_display_name', '')
+
+    # Check if messages are at top level (already extracted/cached)
     if trace.get('messages') and isinstance(trace['messages'], list) and len(trace['messages']) > 0:
         return trace['messages']
 
     # Check if messages are in inputs
     if trace.get('inputs') and isinstance(trace['inputs'], dict):
-        messages = trace['inputs'].get('messages', [])
+        inputs = trace['inputs']
+
+        # Standard OpenAI/Anthropic: inputs.messages
+        messages = inputs.get('messages', [])
         if isinstance(messages, list) and len(messages) > 0:
             return messages
 
+        # OpenAI responses.create: inputs.input (simple string)
+        if 'openai.responses' in op_name and 'input' in inputs:
+            return [{"role": "user", "content": inputs['input']}]
+
+        # Gemini Chat.send_message: inputs.message (simple string)
+        if 'Chat.send_message' in op_name and 'message' in inputs:
+            return [{"role": "user", "content": inputs['message']}]
+
+        # Gemini generate_content: inputs.contents (array of content objects or WeaveObject strings)
+        if 'google.genai' in op_name and 'contents' in inputs:
+            contents = inputs['contents']
+            if isinstance(contents, list) and len(contents) > 0:
+                messages = []
+                for content in contents:
+                    # Handle WeaveObject string format
+                    if isinstance(content, str) and 'WeaveObject' in content:
+                        role_match = re.search(r"'role':\s*'(\w+)'", content)
+                        text_match = re.search(r"'text':\s*'((?:[^'\\]|\\.)*)'", content, re.DOTALL)
+                        text = '[Complex content]'
+                        if text_match:
+                            text = text_match.group(1)
+                            text = text.replace("\\'", "'").replace('\\n', '\n').replace('\\\\', '\\')
+                        messages.append({
+                            "role": role_match.group(1) if role_match else "user",
+                            "content": text
+                        })
+                    # Handle regular dict format
+                    elif isinstance(content, dict):
+                        role = content.get('role', 'user')
+                        parts = content.get('parts', [])
+                        if isinstance(parts, list):
+                            text = '\n'.join([p.get('text', '') for p in parts if isinstance(p, dict)])
+                            messages.append({"role": role, "content": text})
+                if messages:
+                    return messages
+
         # Check if inputs has question/context format (from generate_test_traces.py wrapper traces)
-        question = trace['inputs'].get('question')
-        context = trace['inputs'].get('context')
+        question = inputs.get('question')
+        context = inputs.get('context')
         if question:
             if context:
                 prompt = f"""Based on the following context, answer the question concisely.
@@ -753,16 +846,26 @@ def delete_judge():
 
 @app.route('/run_evaluation', methods=['POST'])
 def run_evaluation_endpoint():
-    """Run evaluation using specified judge"""
-    
+    """Run evaluation using specified judge(s) - supports multiple judges"""
+
 
     data = request.json
     model_file = data.get('model_file')
-    judge = data.get('judge')
+    judges = data.get('judges')  # Can be a list or single judge dict
     task_id = data.get('task_id', f"eval_{id(data)}")
 
-    if not model_file or not judge:
-        return jsonify({'error': 'Missing model_file or judge'}), 400
+    # Handle both single judge (backwards compat) and multiple judges
+    if data.get('judge'):
+        judges = [data.get('judge')]
+    elif not judges:
+        return jsonify({'error': 'Missing judge or judges'}), 400
+
+    # Ensure judges is a list
+    if not isinstance(judges, list):
+        judges = [judges]
+
+    if not model_file:
+        return jsonify({'error': 'Missing model_file'}), 400
 
     # Load weak model results
     model_path = DATA_DIR / model_file
@@ -782,18 +885,22 @@ def run_evaluation_endpoint():
     # Extract model name from filename
     model_name = model_file.replace('weak_model_', '').replace('.json', '')
 
+    # Create evaluation name with all judges
+    judges_names = '_'.join([j['name'] for j in judges])
+    eval_name = f"eval-{model_name}-{judges_names}"
+
     # Initialize progress tracking
     total_steps = len(results)
     progress_state[task_id] = {
         'current': 0,
         'total': total_steps,
-        'message': f'Starting evaluation: {model_name} with {judge["name"]}...',
+        'message': f'Starting evaluation: {model_name} with {len(judges)} judge(s)...',
         'status': 'running'
     }
 
     # Create evaluation logger
     ev = weave.EvaluationLogger(
-        name=f"eval-{model_name}-{judge['name']}",
+        name=eval_name,
         model=model_name
     )
 
@@ -818,13 +925,20 @@ def run_evaluation_endpoint():
         if messages and len(messages) > 0:
             question = messages[0].get('content', '')
 
-        # Run judge
-        if judge['type'] == 'llm':
-            scores = run_llm_judge_eval(judge, strong_output, weak_output, question)
-        else:
-            scores = run_custom_judge_eval(judge, strong_output, weak_output)
+        # Run all judges and collect scores
+        all_scores = {}
+        for judge in judges:
+            # Run judge
+            if judge['type'] == 'llm':
+                scores = run_llm_judge_eval(judge, strong_output, weak_output, question)
+            else:
+                scores = run_custom_judge_eval(judge, strong_output, weak_output)
 
-        # Log to weave
+            # Merge scores with judge name prefix to avoid conflicts
+            for score_key, score_value in scores.items():
+                all_scores[f"{judge['name']}_{score_key}"] = score_value
+
+        # Log to weave with all scores from all judges
         ev.log_example(
             inputs={
                 "question": question,
@@ -834,7 +948,7 @@ def run_evaluation_endpoint():
                 "weak_output": weak_output
 
             },
-            scores=scores
+            scores=all_scores
         )
 
     # Finish evaluation
@@ -850,10 +964,11 @@ def run_evaluation_endpoint():
 
     return jsonify({
         'status': 'success',
-        'evaluation_name': f"eval-{model_name}-{judge['name']}",
+        'evaluation_name': eval_name,
         'examples_evaluated': len(results),
         'weave_url': ev.ui_url,
         'strong_export': strong_export,
+        'judges': [j['name'] for j in judges],
         'task_id': task_id
     })
 
@@ -1030,6 +1145,32 @@ def list_projects():
                 })
 
     return jsonify({'projects': projects})
+
+
+@app.route('/get_preferences', methods=['GET'])
+def get_preferences():
+    """Get saved user preferences"""
+    prefs_file = DATA_DIR / 'preferences.json'
+    if prefs_file.exists():
+        try:
+            with open(prefs_file, 'r') as f:
+                return jsonify(json.load(f))
+        except:
+            pass
+    return jsonify({})
+
+
+@app.route('/save_preferences', methods=['POST'])
+def save_preferences():
+    """Save user preferences"""
+    try:
+        data = request.json
+        prefs_file = DATA_DIR / 'preferences.json'
+        with open(prefs_file, 'w') as f:
+            json.dump(data, f, indent=2)
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 # Routes for serving HTML pages

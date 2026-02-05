@@ -8,7 +8,18 @@ This package provides tools to:
 - Export datasets for model evaluation
 """
 
-__version__ = "0.1.7"
+# Monkey patch for aiohttp/litellm compatibility
+# litellm expects aiohttp.ConnectionTimeoutError but it doesn't exist in some versions
+try:
+    import aiohttp
+    if not hasattr(aiohttp, 'ConnectionTimeoutError'):
+        aiohttp.ConnectionTimeoutError = aiohttp.ServerTimeoutError
+    if not hasattr(aiohttp, 'SocketTimeoutError'):
+        aiohttp.SocketTimeoutError = aiohttp.ServerTimeoutError
+except Exception:
+    pass
+
+__version__ = "0.1.8"
 __author__ = "Brett Young"
 __email__ = "bdytx5@umsystem.edu"
 
